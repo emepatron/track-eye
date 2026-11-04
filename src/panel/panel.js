@@ -101,7 +101,7 @@ async function runScan() {
   try {
     const r = await send({ type: 'scan', tabId: state.tab.id });
     if (!r || !r.scan) throw new Error('A página não respondeu. Recarregue e tente de novo.');
-    state.scan = r.scan; state.probe = r.probe || null; state.deep = r.deep || null; state.events = r.events || []; state.navs = r.navs || []; state.test = null;
+    state.scan = r.scan; state.probe = r.probe || null; state.deep = r.deep || null; state.events = r.events || []; state.navs = r.navs || []; state.test = null; state.buy = null;
     reevaluate();
     $('scan-empty').hidden = true; $('scan-result').hidden = false;
     toast('Varredura concluída');
@@ -152,9 +152,35 @@ $('btn-utm-copy').addEventListener('click', async () => {
 });
 
 function reevaluate() {
-  state.result = evaluate({ scan: state.scan, probe: state.probe, deep: state.deep, events: state.events, navs: state.navs, client: state.client, test: state.test });
+  state.result = evaluate({ scan: state.scan, probe: state.probe, deep: state.deep, events: state.events, navs: state.navs, client: state.client, test: state.test, buy: state.buy });
   renderResult();
 }
+
+// ---------------- teste de clique de compra ----------------
+$('btn-buy').addEventListener('click', async () => {
+  if (!state.tab || !state.scan) return;
+  const b = ((state.scan.commerce || {}).buyButtons || [])[Number($('buy-button').value)];
+  if (!b) return;
+  const ok = confirm(`Clicar em "${b.text || b.host}" nesta página e observar por 8 segundos? Nada é preenchido nem pago; se o botão levar ao checkout, a aba vai para lá.`);
+  if (!ok) return;
+  state.testRunning = true; state.buy = null;
+  $('btn-buy').disabled = true; $('buy-progress').hidden = false;
+  try {
+    const clicked = await send({ type: 'clickBuy', tabId: state.tab.id, path: b.path, href: b.href });
+    if (!clicked.ok) { state.buy = { ...clicked, startedAt: Date.now() }; reevaluate(); toast(clicked.error, true); return; }
+    await new Promise((r) => setTimeout(r, 8000));
+    const r = await send({ type: 'events', tabId: state.tab.id });
+    state.events = r.events || state.events; state.navs = r.navs || state.navs;
+    state.buy = { ...clicked, button: b };
+    reevaluate();
+    toast('Clique observado');
+  } catch (e) {
+    toast(e.message, true);
+  } finally {
+    state.testRunning = false;
+    $('btn-buy').disabled = false; $('buy-progress').hidden = true;
+  }
+});
 
 const VERDICT_TEXT = { verde: 'Pode subir campanha', amarelo: 'Sobe com ressalvas; corrigir em seguida', vermelho: 'Corrigir antes de subir campanha' };
 function renderResult() {
@@ -168,7 +194,7 @@ function renderResult() {
   const f = state.filter;
   const keep = (c) => f === 'all' || (f === 'issues' && (c.status === 'fail' || c.status === 'warn')) || (f === 'pass' && c.status === 'pass') || (f === 'unknown' && (c.status === 'unknown' || c.status === 'info'));
   const order = { fail: 0, warn: 1, unknown: 2, info: 3, pass: 4 };
-  const groups = ['teste', 'tags', 'whatsapp', 'forms', 'utm', 'saude'];
+  const groups = ['teste', 'compra', 'tags', 'whatsapp', 'forms', 'utm', 'saude'];
   let html = '';
   for (const g of groups) {
     const items = r.checks.filter((c) => c.group === g && keep(c)).sort((a, b) => order[a.status] - order[b.status]);
@@ -187,6 +213,15 @@ function renderResult() {
   const forms = state.scan.forms || [];
   sel.innerHTML = forms.length ? forms.map((x) => `<option value="${x.key || `0:${x.index}`}">${esc(x.id || x.name || `Formulário ${x.index + 1}`)} · ${x.visibleFields} campos · ${esc(x.provider)}${x.visible === false ? ' · oculto' : ''}</option>`).join('') : '<option value="">Nenhum formulário na página</option>';
   $('btn-test').disabled = !forms.length || state.testRunning;
+
+  // botões de compra disponíveis para o teste de clique
+  const cm = state.scan.commerce || { buyButtons: [] };
+  const buyCard = $('buy-card');
+  buyCard.hidden = !(cm.buyButtons && cm.buyButtons.length);
+  if (!buyCard.hidden) {
+    $('buy-button').innerHTML = cm.buyButtons.map((b, i) => `<option value="${i}">${esc(b.text || b.host || `Botão ${i + 1}`)}${b.platform ? ` · ${esc(b.platform)}` : b.host ? ` · ${esc(b.host)}` : ''} · ${esc(b.position)}</option>`).join('');
+    $('btn-buy').disabled = !!state.testRunning;
+  }
 
   renderInventory();
 }
@@ -208,6 +243,7 @@ function renderInventory() {
     <h4>IDs encontrados</h4>${kv([['GTM', ids('gtm')], ['GA4', ids('ga4')], ['Meta', ids('meta')], ['Google Ads', ids('ads')], ['Clarity', ids('clarity')], ['Hotjar', ids('hotjar')], ['TikTok', ids('tiktok')]])}
     <h4>WhatsApp, chat e telefone</h4>${(s.whatsapp || []).length || (s.tel || []).length || (s.whatsappWidgets || []).length || (s.chats || []).length ? kv([...(s.whatsapp || []).map((l) => [l.position, `${formatPhone(l.phone)}${l.hasMessage ? ' · "' + l.message.slice(0, 50) + '"' : ' · sem mensagem'}`]), ...(s.whatsappWidgets || []).map((x) => [x.position, `botão "${x.label}" sem link direto`]), ...(s.chats || []).map((c) => ['chat', c]), ...(s.tel || []).map((n) => ['tel:', formatPhone(n)])]) : '<span class="muted small">Nenhum.</span>'}
     <h4>Formulários</h4>${(s.forms || []).length || (s.embeddedForms || []).length ? kv([...s.forms.map((f) => [f.id || `#${f.index + 1}`, `${f.provider} · ${f.visibleFields} visíveis, ${f.hiddenFields} ocultos${f.actionHost ? ' → ' + f.actionHost : ''}${f.visible === false ? ' · oculto' : ''} · ${f.fields.map((x) => x.name || x.placeholder || x.type).join(', ')}`]), ...(s.embeddedForms || []).map((e) => ['iframe', `${e.provider} · ${e.src.slice(0, 80)}`])]) : '<span class="muted small">Nenhum.</span>'}
+    ${s.commerce && (s.commerce.kind || s.commerce.buyButtons.length) ? `<h4>Compra</h4>${kv([['Tipo', `${s.commerce.kind === 'loja' ? 'loja' : s.commerce.kind === 'vendas' ? 'página de vendas' : 'botão de compra'}${s.commerce.platform ? ' · ' + s.commerce.platform : ''}`], ...(s.commerce.product ? [['Produto', `${s.commerce.product.name}${s.commerce.product.price ? ' · ' + (s.commerce.product.currency || '') + ' ' + s.commerce.product.price : ''}`]] : []), ...s.commerce.buyButtons.slice(0, 8).map((b) => [b.position, `"${b.text}"${b.href ? ' → ' + b.href.slice(0, 90) : ''}${b.originKeys.length ? ' · origem: ' + b.originKeys.join(', ') : ''}`]), ['Funil visto', s.commerce.funnelEvents.length ? s.commerce.funnelEvents.join(', ') : 'nenhum evento de funil nesta visita']])}` : ''}
     <h4>Página</h4>${kv([['H1', (s.h1 || []).join(' | ') || '—'], ['Scripts de', (s.scriptHosts || []).slice(0, 12).join(', ') || '—'], ['Iframes', (s.frames || []).length ? s.frames.map((f) => `${f.host} (${f.forms} form)`).join(', ') : '—'], ['No JS', state.deep ? [...(state.deep.waInJs || []), ...(state.deep.endpoints || [])].slice(0, 8).join(', ') || 'nada relevante' : '—'], ['dataLayer', s.log.dataLayerEvents.length ? s.log.dataLayerEvents.join(', ') : `${s.log.dataLayerPushes} push(es)`], ['Erros JS', String(s.health.errorCount || 0)]])}
     <h4>Eventos observados (${timeline.length})</h4>${timeline.length ? `<div class="timeline">${timeline.map((x) => `<div><span class="${x.k === 'nav' ? 'nav' : 'k'}">${x.k === 'nav' ? 'página' : x.k}</span><span>+${((x.t - base) / 1000).toFixed(1)}s ${esc(x.txt)}</span></div>`).join('')}</div>` : '<span class="muted small">Nenhuma requisição de rastreamento observada. Se a página já estava aberta, use Recarregar e varrer.</span>'}
   </div>`;

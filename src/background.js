@@ -1,7 +1,7 @@
 // Service worker do Track Eye: observa as requisições de rastreamento de cada
 // aba (só observa, nunca bloqueia), registra navegações e executa a varredura
 // e o teste de envio a pedido do painel.
-import { trackEyeScan, trackEyeFillAndSubmit, trackEyeProbe, trackEyeDeep, trackEyeAfterSubmit, trackEyeIsVisible, trackEyeReachForm } from './scanner.js';
+import { trackEyeScan, trackEyeFillAndSubmit, trackEyeProbe, trackEyeDeep, trackEyeAfterSubmit, trackEyeIsVisible, trackEyeReachForm, trackEyeClickBuy } from './scanner.js';
 import { classify, URL_FILTERS, bodyText } from './net.js';
 
 const MAX_EVENTS = 600;
@@ -193,6 +193,12 @@ const handlers = {
     state.testing = null;
     touch(tabId);
     return { events: state.events, navs: state.navs, submissions, after: after || {} };
+  },
+  // Clique de compra: clica no botão escolhido e deixa o observador de rede
+  // registrar o que sai (InitiateCheckout, begin_checkout, navegação ao checkout).
+  async clickBuy({ tabId, path = '', href = '' }) {
+    const result = await runInPage(tabId, trackEyeClickBuy, [path, href]);
+    return result || { ok: false, error: 'Sem resposta da página.' };
   },
   async capture({ windowId }) {
     const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: 'png' });

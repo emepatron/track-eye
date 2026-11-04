@@ -349,6 +349,81 @@ export function trackEyeScan(win) {
     for (const c of (doc.cookie || '').split(';')) { const k = c.trim().split('=')[0]; if (/utm|fbclid|gclid|ttclid|origem|first_touch|last_touch/i.test(k)) originStorage.push(`cookie.${k}`); }
   } catch { /* storage bloqueado */ }
 
+  // ---------- Loja e página de vendas ----------
+  // Reconhece a plataforma, os links de checkout (e se levam a origem), os botões
+  // de compra e os eventos de funil já vistos nesta visita (fbq, dataLayer, gtag).
+  const checkoutPlatforms = [
+    ['Hotmart', /hotmart\.com/i], ['Kiwify', /kiwify\.(app|com\.br)/i], ['Eduzz', /eduzz\.com/i], ['Monetizze', /monetizze\.com/i],
+    ['Braip', /braip\.com/i], ['Ticto', /ticto\.com/i], ['PerfectPay', /perfectpay\.com/i], ['Cakto', /cakto\.com/i], ['Pepper', /pepper\.com\.br/i],
+    ['Lastlink', /lastlink\.com/i], ['Greenn', /greenn\.com/i], ['Kirvano', /kirvano\.com/i], ['Hubla', /hubla\.com/i], ['Payt', /payt\.com/i],
+    ['Yampi', /yampi\.com/i], ['Cartpanda', /cartpanda\.com/i], ['Mercado Pago', /mercadopago\.com/i], ['PagSeguro', /pagseguro\.uol|pagbank/i], ['Appmax', /appmax\.com/i], ['Stripe', /checkout\.stripe\.com/i],
+  ];
+  const internalCheckoutRe = /\/(checkout|cart|carrinho|finalizar-compra|finalizar|comprar|pagamento|pedido)(\/|\?|#|$)/i;
+  const platformOf = (href) => { const p = checkoutPlatforms.find(([, re]) => re.test(href)); return p ? p[0] : ''; };
+  const metaOf = (name) => { const m = doc.querySelector(`meta[name="${name}"], meta[property="${name}"]`); return m ? (m.getAttribute('content') || '') : ''; };
+  const storeDetect = () => {
+    const hay = corpus + '\n' + (doc.body ? doc.body.className : '') + '\n' + (metaOf('generator') || '');
+    if (w.Shopify || /cdn\.shopify\.com|myshopify\.com/i.test(hay)) return 'Shopify';
+    if (/woocommerce/i.test(hay)) return 'WooCommerce';
+    if (/nuvemshop|tiendanube/i.test(hay) || (w.LS && w.LS.store)) return 'Nuvemshop';
+    if (/tray\.com\.br|traycommerce|tcdn\.com\.br/i.test(hay)) return 'Tray';
+    if (/vtex/i.test(hay)) return 'VTEX';
+    if (/lojaintegrada/i.test(hay)) return 'Loja Integrada';
+    if (/yampi/i.test(hay)) return 'Yampi';
+    if (/cartpanda/i.test(hay)) return 'Cartpanda';
+    if (/bagy\.com/i.test(hay)) return 'Bagy';
+    if (/wixstores|wix-ecommerce/i.test(hay)) return 'Wix Stores';
+    if (/magento|mage\//i.test(hay)) return 'Magento';
+    return '';
+  };
+  // Só palavras de compra de verdade: "quero receber", "garanta sua vaga no webinar" são de lead, não de venda.
+  const buyRe = /\b(comprar|compre|adquirir|assinar|assine|matricul|checkout|finalizar (a )?compra|adicionar ao carrinho|add to cart|buy now|pagar agora|garantir (minha|sua|a) vaga|garanta (sua|a) vaga|acesso imediato|liberar acesso)\b/i;
+  const originKeys = (href) => { try { return Array.from(new URL(href).searchParams.keys()).filter((k) => /^(utm_|src$|sck$|xcod$|ref$|fbclid|gclid|ttclid|affiliate|aff|bid)/i.test(k)); } catch { return []; } };
+  const buyButtons = [];
+  for (const el of matching((e) => /^(A|BUTTON)$/.test(e.tagName) || e.getAttribute('role') === 'button' || (e.tagName === 'INPUT' && /submit|button/i.test(e.type)))) {
+    const label = text(el) || el.value || el.getAttribute('aria-label') || '';
+    const href = el.tagName === 'A' && el.getAttribute('href') ? abs(el.getAttribute('href')) : '';
+    const platform = href ? platformOf(href) : '';
+    const internal = href ? internalCheckoutRe.test(href) : false;
+    const isBuy = buyRe.test(label) || !!platform || internal || /add-to-cart|single_add_to_cart|buy-button|checkout/i.test((el.className || '') + ' ' + (el.id || '') + ' ' + (el.getAttribute('name') || ''));
+    if (!isBuy) continue;
+    if (href && /(wa\.me|api\.whatsapp\.com|whatsapp:\/\/|mailto:|tel:)/i.test(href)) continue;
+    buyButtons.push({
+      text: label.slice(0, 60), href: href.slice(0, 300), host: href ? (() => { try { return new URL(href).hostname; } catch { return ''; } })() : '',
+      platform, internal, external: !!href && !internal && (platform ? true : (() => { try { return new URL(href).hostname !== loc.hostname; } catch { return false; } })()),
+      originKeys: href ? originKeys(href) : [], position: place(el), visible: visible(el), path: cssPath(el),
+    });
+    if (buyButtons.length >= 20) break;
+  }
+  const checkoutLinks = buyButtons.filter((b) => b.platform || b.internal);
+  let product = null;
+  try {
+    for (const s of Array.from(doc.querySelectorAll('script[type="application/ld+json"]'))) {
+      const j = JSON.parse(s.textContent || 'null');
+      const items = Array.isArray(j) ? j : (j && j['@graph']) ? j['@graph'] : [j];
+      const p = items.find((x) => x && /product/i.test(String(x['@type'] || '')));
+      if (p) { const o = Array.isArray(p.offers) ? p.offers[0] : p.offers; product = { name: String(p.name || '').slice(0, 80), price: o && o.price != null ? String(o.price) : '', currency: o && o.priceCurrency ? String(o.priceCurrency) : '' }; break; }
+    }
+  } catch { /* JSON-LD inválido */ }
+  if (!product && (metaOf('product:price:amount') || /^product/i.test(metaOf('og:type')))) product = { name: metaOf('og:title').slice(0, 80), price: metaOf('product:price:amount'), currency: metaOf('product:price:currency') };
+  const storePlatform = storeDetect();
+  const funnelRe = /^(viewcontent|addtocart|initiatecheckout|addpaymentinfo|purchase|view_item|add_to_cart|begin_checkout|add_payment_info|purchase|view_item_list|select_item)$/i;
+  const funnelEvents = uniq([
+    ...(log.fbq || []).map((c) => c.args).filter((a) => a && /^track/i.test(String(a[0])) && funnelRe.test(String(a[1] || ''))).map((a) => `fbq:${a[1]}`),
+    ...(log.dataLayer || []).map((p) => p.args && p.args[0] && p.args[0].event).filter((e) => e && funnelRe.test(e)).map((e) => `dataLayer:${e}`),
+    ...(log.gtag || []).map((c) => c.args).filter((a) => a && a[0] === 'event' && funnelRe.test(String(a[1] || ''))).map((a) => `gtag:${a[1]}`),
+  ]);
+  const commerceKind = storePlatform || buyButtons.some((b) => /carrinho|cart/i.test(b.text + ' ' + b.href)) ? 'loja'
+    : (checkoutLinks.length || (product && buyButtons.length)) ? 'vendas' : '';
+  const commerce = {
+    kind: commerceKind,
+    platform: storePlatform || uniq(checkoutLinks.map((b) => b.platform)).join(', '),
+    product,
+    buyButtons,
+    checkoutLinks,
+    funnelEvents,
+  };
+
   // ---------- Saúde básica ----------
   const linkCss = matching((el) => el.tagName === 'LINK' && /stylesheet/i.test(el.getAttribute('rel') || '')).map((l) => abs(l.href));
   let resources = [];
@@ -399,6 +474,7 @@ export function trackEyeScan(win) {
     embeddedForms,
     utm,
     propagated,
+    commerce,
     originStorage: uniq(originStorage).slice(0, 20),
     health: {
       linkCss: linkCss.length,
@@ -639,6 +715,24 @@ export async function trackEyeReachForm(formIndex, path, maxSteps) {
     if (!acted) { log.push('nada para clicar'); break; }
   }
   return { reached: visible(form), steps, log };
+}
+
+// Teste de clique de compra: encontra o botão pelo caminho CSS da varredura,
+// confere se está visível, rola até ele e clica. Não preenche nem paga nada;
+// o background observa o que a página dispara e para onde o clique leva.
+export function trackEyeClickBuy(path, expectedHref) {
+  let el = null;
+  try { el = path ? document.querySelector(path) : null; } catch { el = null; }
+  if (!el && expectedHref) el = Array.from(document.querySelectorAll('a[href]')).find((a) => a.href === expectedHref) || null;
+  if (!el) return { ok: false, error: 'Botão de compra não encontrado (a página mudou desde a varredura).' };
+  const r = el.getBoundingClientRect();
+  const cs = getComputedStyle(el);
+  if ((r.width === 0 && r.height === 0) || cs.display === 'none' || cs.visibility === 'hidden') return { ok: false, error: 'O botão está oculto nesta etapa da página.' };
+  try { el.scrollIntoView({ block: 'center' }); } catch { /* sem scroll */ }
+  const href = el.tagName === 'A' ? el.href : '';
+  const startedAt = Date.now();
+  try { el.click(); } catch (e) { return { ok: false, error: 'Falha ao clicar: ' + String(e.message || e) }; }
+  return { ok: true, startedAt, url: location.href, href, text: (el.innerText || el.textContent || el.value || '').replace(/\s+/g, ' ').trim().slice(0, 60) };
 }
 
 // Depois do teste: mensagem de sucesso visível e campos marcados como inválidos.

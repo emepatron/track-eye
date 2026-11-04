@@ -17,6 +17,8 @@ const demoHtml = `<!doctype html><html><head><title>LP Demonstração — Track 
 <body><h1>Sua clínica cheia em 30 dias</h1>
 <a href="https://wa.me/5535999990000?text=Ol%C3%A1%2C%20vim%20pela%20campanha">Falar no WhatsApp</a>
 <a href="https://wa.me/5531988887777">WhatsApp rodapé</a>
+<a class="btn" href="https://pay.hotmart.com/A1B2C3D4?src=lp&sck=instagram">Quero garantir minha vaga</a>
+<a class="btn" href="https://pay.hotmart.com/A1B2C3D4">Comprar agora</a>
 <form id="lead-form" class="elementor-form" action="https://hooks.n8n.cloud/webhook/x"><input name="nome"><input type="email" name="email"><input type="tel" name="whatsapp"><input type="hidden" name="utm_source"><button type="submit">Quero agendar</button></form></body></html>`;
 
 const demoScan = () => {
@@ -54,6 +56,7 @@ globalThis.chrome = {
       if (msg.type === 'events' || msg.type === 'afterTest') return reply({ events: [...demoEvents, { t: Date.now(), kind: 'meta', url: '', params: { id: '1234567890123456', ev: 'Lead' } }], navs: [...demoNavs, { t: Date.now(), url: 'https://lp.clinicaexemplo.com.br/obrigado' }], dataLayerEvents: ['form_submit'] });
       if (msg.type === 'startTest') return reply({ ok: true, startedAt: Date.now(), url: tab.url, filled: [{ name: 'nome', value: 'TESTE TRACK EYE' }, { name: 'email', value: msg.data.email }], submittedVia: 'clique no botão "Quero agendar"' });
       if (msg.type === 'capture') return reply({ dataUrl: 'data:image/png;base64,' });
+      if (msg.type === 'clickBuy') { demoEvents.push({ t: Date.now() + 1500, kind: 'meta', url: '', params: { id: '1234567890123456', ev: 'InitiateCheckout' } }); demoNavs.push({ t: Date.now() + 2000, url: 'https://pay.hotmart.com/A1B2C3?src=lp&sck=instagram' }); return reply({ ok: true, startedAt: Date.now(), url: tab.url, href: msg.href, text: 'Quero garantir minha vaga' }); }
       return reply({ ok: true });
     },
   },

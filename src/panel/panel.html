@@ -96,6 +96,16 @@
           </div>
         </details>
 
+        <details class="card details-card" id="buy-card" hidden>
+          <summary>Testar clique de compra</summary>
+          <div class="details-body">
+            <p class="small muted">Clica no botão de compra escolhido e observa por 8 segundos: InitiateCheckout na Meta, begin_checkout no GA4 e para onde o checkout vai (com quais parâmetros). Não preenche nem paga nada; para no checkout.</p>
+            <label class="field"><span>Botão</span><select id="buy-button"></select></label>
+            <button class="btn btn-outline" id="btn-buy" type="button">Clicar e observar</button>
+            <div class="progress" id="buy-progress" hidden><div class="bar"></div><span>Observando o clique…</span></div>
+          </div>
+        </details>
+
         <details class="card details-card" id="inventory-card">
           <summary>Inventário e eventos observados</summary>
           <div class="details-body" id="inventory"></div>

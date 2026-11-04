@@ -44,7 +44,7 @@ export function lastNavBefore(navs, ts) {
   return (navs || []).filter((n) => n.t <= ts).reduce((acc, n) => (n.t > acc ? n.t : acc), 0);
 }
 
-export function evaluate({ scan, probe = null, deep = null, events = [], navs = [], client = null, test = null }) {
+export function evaluate({ scan, probe = null, deep = null, events = [], navs = [], client = null, test = null, buy = null }) {
   const checks = [];
   const add = (c) => { checks.push({ evidence: '', fix: '', ...c }); return c; };
 
@@ -390,11 +390,74 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
     if (dl.length) add({ id: 'test-dl', group: 'teste', status: STATUS.info, title: `dataLayer recebeu: ${dl.join(', ')}` });
   }
 
+  // ---------- Compra: loja e página de vendas ----------
+  const cm = scan.commerce || null;
+  if (cm && (cm.kind || cm.buyButtons.length)) {
+    const pageEv = currentPageEvents(events, navs);
+    const metaEv = (name) => pageEv.filter((e) => e.kind === 'meta' && new RegExp(`^${name}$`, 'i').test(e.params.ev || ''));
+    const ga4Ev = (name) => pageEv.filter((e) => e.kind === 'ga4' && new RegExp(`^${name}$`, 'i').test(e.params.en || ''));
+    const kindLabel = cm.kind === 'loja' ? 'Loja' : cm.kind === 'vendas' ? 'Página de vendas' : 'Página com botão de compra';
+    add({ id: 'buy-kind', group: 'compra', status: STATUS.info, title: `${kindLabel}${cm.platform ? ` · ${cm.platform}` : ''}`,
+      evidence: [cm.product && cm.product.name ? `Produto: ${cm.product.name}${cm.product.price ? ` · ${cm.product.currency || ''} ${cm.product.price}`.trim() : ''}` : '', `${cm.buyButtons.length} botão(ões) de compra`, cm.checkoutLinks.length ? `${cm.checkoutLinks.length} link(s) de checkout` : ''].filter(Boolean).join(' · ') });
+
+    // ViewContent / view_item no carregamento
+    const vcMeta = metaEv('ViewContent'); const viGa = ga4Ev('view_item');
+    if (vcMeta.length || viGa.length) add({ id: 'buy-view', group: 'compra', status: STATUS.pass, title: `Evento de visualização disparou (${[vcMeta.length ? 'ViewContent na Meta' : '', viGa.length ? 'view_item no GA4' : ''].filter(Boolean).join(', ')})` });
+    else if (metaIds.length || ga4Ids.length) add({ id: 'buy-view', group: 'compra', status: blockedHosts.length ? STATUS.unknown : STATUS.warn, title: 'Sem ViewContent (Meta) nem view_item (GA4) nesta visita',
+      evidence: cm.funnelEvents.length ? `A página chamou ${cm.funnelEvents.join(', ')}, mas nada chegou à rede.` : 'Só PageView/page_view foram observados.',
+      fix: 'Dispare ViewContent (com content_ids e value) e view_item ao carregar a página do produto. É o primeiro degrau do funil de compra nos relatórios e nas otimizações.' });
+
+    // Links de checkout levam a origem?
+    if (cm.checkoutLinks.length) {
+      const withOrigin = cm.checkoutLinks.filter((b) => b.originKeys.length);
+      const hasUtm = Object.keys(scan.utm || {}).length > 0;
+      if (withOrigin.length === cm.checkoutLinks.length) add({ id: 'buy-origin', group: 'compra', status: STATUS.pass, title: `Link(s) de checkout levam a origem (${uniq(cm.checkoutLinks.flatMap((b) => b.originKeys)).join(', ')})`, evidence: cm.checkoutLinks.slice(0, 3).map((b) => `${b.text || b.host}: ${b.href.slice(0, 120)}`).join('\n') });
+      else add({ id: 'buy-origin', group: 'compra', status: hasUtm ? STATUS.fail : STATUS.warn, title: `${cm.checkoutLinks.length - withOrigin.length} de ${cm.checkoutLinks.length} link(s) de checkout sem origem (utm, src, sck)`,
+        evidence: cm.checkoutLinks.filter((b) => !b.originKeys.length).slice(0, 3).map((b) => `${b.text || b.host}: ${b.href.slice(0, 120)}`).join('\n') + (hasUtm ? '\nA página foi aberta com UTM e mesmo assim o link não a carrega.' : '\nAbra a página com UTM de teste para conferir se o link a repassa por JavaScript.'),
+        fix: 'Repasse a UTM da página para o link de checkout (na Hotmart, use src e sck; na Kiwify e nas outras, utm_source, utm_medium e utm_campaign). Sem isso a venda chega sem campanha e a atribuição some.' });
+    }
+
+    // Purchase: só com compra. Fica dito como não conferido.
+    const purchase = [...metaEv('Purchase'), ...ga4Ev('purchase')];
+    if (purchase.length) add({ id: 'buy-purchase', group: 'compra', status: STATUS.info, title: `Evento de compra observado nesta visita (${uniq(purchase.map((e) => e.kind === 'meta' ? 'Purchase' : 'purchase')).join(', ')})`, evidence: 'Confira se disparou só na confirmação do pagamento, nunca ao abrir a página.' });
+    else add({ id: 'buy-purchase', group: 'compra', status: STATUS.unknown, title: 'Evento de compra (Purchase / purchase) não dá para conferir sem uma compra',
+      evidence: cm.checkoutLinks.some((b) => b.platform) ? `O checkout é externo (${uniq(cm.checkoutLinks.map((b) => b.platform)).filter(Boolean).join(', ')}): o evento de compra depende do pixel configurado na plataforma, não desta página.` : 'O evento dispara na confirmação do pagamento, que a varredura não alcança.',
+      fix: 'Faça uma compra de teste (produto de R$ 1 ou cupom de 100%) com o Track Eye aberto até a página de obrigado e veja no inventário se Purchase/purchase saiu com valor e moeda.' });
+
+    // Teste de clique
+    if (buy && buy.startedAt) {
+      const after = (events || []).filter((e) => e.t >= buy.startedAt - 200);
+      const navAfter = (navs || []).filter((n) => n.t >= buy.startedAt && n.url !== buy.url);
+      const ic = after.filter((e) => e.kind === 'meta' && /^(InitiateCheckout|AddToCart|AddPaymentInfo)$/i.test(e.params.ev || ''));
+      const bc = after.filter((e) => e.kind === 'ga4' && /^(begin_checkout|add_to_cart|add_payment_info)$/i.test(e.params.en || ''));
+      add({ id: 'buy-click', group: 'compra', status: buy.ok ? STATUS.info : STATUS.fail, title: buy.ok ? `Clique de compra em "${buy.text}"` : `Não foi possível clicar: ${buy.error}`, evidence: buy.href ? buy.href.slice(0, 160) : '' });
+      if (buy.ok) {
+        add(ic.length
+          ? { id: 'buy-click-meta', group: 'compra', status: STATUS.pass, title: `Meta recebeu ${uniq(ic.map((e) => e.params.ev)).join(', ')} após o clique (${uniq(ic.map((e) => e.params.id)).join(', ')})` }
+          : { id: 'buy-click-meta', group: 'compra', status: metaIds.length ? STATUS.fail : STATUS.unknown, title: 'Meta não recebeu InitiateCheckout após o clique',
+            evidence: metaIds.length ? 'O pixel existe, mas nenhum fbq("track","InitiateCheckout") saiu em 8 s.' : 'Não há pixel da Meta na página.',
+            fix: 'Dispare InitiateCheckout no clique do botão de compra (GTM: gatilho de clique no link do checkout). Sem isso a Meta não enxerga quem chegou ao checkout.' });
+        add(bc.length
+          ? { id: 'buy-click-ga4', group: 'compra', status: STATUS.pass, title: `GA4 recebeu ${uniq(bc.map((e) => e.params.en)).join(', ')} após o clique` }
+          : { id: 'buy-click-ga4', group: 'compra', status: ga4Ids.length ? STATUS.warn : STATUS.unknown, title: 'GA4 não recebeu begin_checkout após o clique',
+            evidence: ga4Ids.length ? 'Nenhum begin_checkout ou add_to_cart em 8 s.' : 'Não há GA4 na página.', fix: 'Marque o clique de compra como begin_checkout no GA4; é o que alimenta o funil de e-commerce.' });
+        if (navAfter.length) {
+          const last = navAfter[navAfter.length - 1];
+          const keys = (() => { try { return Array.from(new URL(last.url).searchParams.keys()).filter((k) => /^(utm_|src$|sck$|xcod$|ref$|fbclid|gclid|ttclid)/i.test(k)); } catch { return []; } })();
+          add({ id: 'buy-click-nav', group: 'compra', status: STATUS.pass, title: `Clique levou ao checkout (${(() => { try { return new URL(last.url).hostname; } catch { return last.url; } })()})`, evidence: last.url.slice(0, 200) });
+          if (Object.keys(scan.utm || {}).length) add(keys.length
+            ? { id: 'buy-click-origin', group: 'compra', status: STATUS.pass, title: `Origem chegou ao checkout (${keys.join(', ')})` }
+            : { id: 'buy-click-origin', group: 'compra', status: STATUS.fail, title: 'Origem não chegou ao checkout', evidence: 'A página tinha UTM e a URL do checkout abriu sem utm, src ou sck.', fix: 'Repasse os parâmetros da página para o link de checkout.' });
+        } else if (!ic.length && !bc.length) add({ id: 'buy-click-nav', group: 'compra', status: STATUS.warn, title: 'O clique não levou a outra página nem disparou evento', evidence: 'Pode abrir em nova aba, modal ou carrinho lateral; nesse caso confira o inventário.', fix: 'Se o botão abre em nova aba, o Track Eye não acompanha; mude para a mesma aba durante o teste ou confira o checkout manualmente.' });
+      }
+    }
+  }
+
   const counts = { pass: 0, warn: 0, fail: 0, info: 0, unknown: 0 };
   for (const c of checks) counts[c.status] = (counts[c.status] || 0) + 1;
   const verdict = counts.fail ? 'vermelho' : counts.warn ? 'amarelo' : 'verde';
   return { verdict, counts, checks, evaluatedAt: Date.now() };
 }
 
-export const GROUP_LABELS = { tags: 'Tags', whatsapp: 'WhatsApp', forms: 'Formulários', utm: 'UTM', saude: 'Saúde da página', teste: 'Teste de envio' };
+export const GROUP_LABELS = { tags: 'Tags', whatsapp: 'WhatsApp', forms: 'Formulários', utm: 'UTM', compra: 'Compra', saude: 'Saúde da página', teste: 'Teste de envio' };
 export const STATUS_LABELS = { pass: 'Em ordem', warn: 'Atenção', fail: 'Crítico', info: 'Informação', unknown: 'Não deu para conferir' };
