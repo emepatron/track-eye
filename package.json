@@ -1,6 +1,6 @@
 {
   "name": "track-eye",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Extensão de navegador para auditar o rastreamento de landing pages: tags, WhatsApp, formulários, UTM e teste de envio.",
   "license": "MIT",

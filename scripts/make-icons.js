@@ -77,8 +77,9 @@ const pixel = sample((x, y, s) => {
   const R = (eyeW * eyeH) / Math.hypot(eyeH * Math.cos(ang), eyeW * Math.sin(ang));
   const d = Math.hypot(dxr, dyr);
   if (Math.abs(d - R) < half) return W;
-  if (Math.abs(d - 0.129) < half) return W;
-  if (d <= 0.046) return C;
+  // em 16 px o anel da íris vira borrão: fica só o contorno e a pupila
+  if (s > 24 && Math.abs(d - 0.129) < half) return W;
+  if (d <= (s > 24 ? 0.046 : 0.11)) return C;
   return K;
 });
 

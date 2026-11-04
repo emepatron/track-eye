@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Track Eye",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Raio-X de rastreamento de landing pages: tags, WhatsApp, formulários, UTM e página de obrigado, com laudo pronto em segundos.",
   "minimum_chrome_version": "116",
   "icons": {
