@@ -13,7 +13,7 @@
 - ✅ **Em ordem**: passou, com evidência.
 - ⚠️ **Atenção**: funciona, mas está perdendo informação ou dinheiro (sem Clarity, link de WhatsApp sem mensagem, formulário longo).
 - 🔴 **Crítico**: manda lead para o lugar errado ou torna a campanha cega (número de WhatsApp diferente do cadastro, sem GA4, formulário em HTTP, UTM que não chega).
-- ℹ️ **Informação**: fato útil sem julgamento (chat na página, tag do Google Ads ausente quando o cliente não roda Google).
+- ℹ️ **Informação**: fato útil sem julgamento (chat na página, tag do Google Ads ausente quando a página não roda Google Ads).
 - ⬜ **Não deu para conferir**: o Track Eye não teve evidência. Nunca vira achado. Diz o que faltou e como conferir na mão.
 
 ## Blocos do laudo em markdown
@@ -33,7 +33,7 @@
 
 **"Mais de um pixel" ou "mais de um container".** Normalmente agência antiga mais agência nova. Confirme qual é o oficial e remova o outro.
 
-**"WhatsApp não bate com o cadastro."** O botão aponta para um número diferente do que você cadastrou para o cliente. Corrija antes de subir campanha.
+**"WhatsApp não bate com o cadastro."** O botão aponta para um número diferente do que você cadastrou para o projeto. Corrija antes de subir campanha.
 
 **"Botão de WhatsApp sem link direto."** O botão abre o WhatsApp ou um chat por JavaScript; o número não está no HTML. Clique e confira na mão.
 
@@ -49,6 +49,6 @@
 
 **"Origem foi junto no envio."** As chaves `utm_` apareceram no corpo da requisição ao CRM. O lead chega sabendo de qual campanha veio.
 
-## Como usar o laudo com o cliente
+## Como usar o laudo
 
 Copie o **resumo** para o grupo quando quiser mostrar que a LP foi conferida. Copie o **laudo completo** quando precisar justificar uma correção ou provar que o problema não era o tráfego. Salve no **histórico** antes e depois de corrigir: a diferença é o trabalho feito.

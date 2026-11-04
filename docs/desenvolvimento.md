@@ -10,7 +10,8 @@ src/net.js                    classificação das requisições de rastreamento 
 src/scanner.js                funções injetadas na página: varredura, sonda de bloqueio, leitura de scripts, avanço por etapas, preenchimento e envio
 src/rules.js                  regras do laudo e veredito
 src/report.js                 laudo em markdown e resumo curto
-src/clients.js                cadastro de clientes, configurações e histórico (chrome.storage.local)
+src/clients.js                cadastro de projetos ("clients" no código), configurações e histórico (chrome.storage.local)
+src/utm.js                    URL de teste com UTM (modelo com {data} e {hora}; substitui UTM que já existia)
 src/panel/                    interface (HTML, CSS, JS) do painel lateral
 src/panel/mock-chrome.js      chrome.* falso para abrir o painel num navegador comum
 assets/                       fontes empacotadas, ícones, logo
@@ -65,9 +66,19 @@ O navegador guarda o ícone da barra em cache por versão da extensão. Ao mudar
 
 `site/index.html` é a landing page, em um arquivo só, com caminhos relativos (`../assets/...`) para abrir tanto do disco quanto servida. `site/Dockerfile` (nginx:alpine) e `site/nginx.conf` (headers de segurança, gzip, cache, redirects `/github` e `/download`) servem para qualquer host que aceite Dockerfile, com o contexto de build na raiz do repositório e o Dockerfile em `site/Dockerfile`.
 
-## Estado (03/11/2026)
+A imagem de compartilhamento (`site/og.png`, 1200×630, usada em `og:image` e `twitter:image`) sai de `site/og.svg` pelo `rsvg-convert`. As fontes do SVG são as mesmas `.woff2` de `assets/fonts`, que o fontconfig só enxerga com um `fonts.conf` apontando para essa pasta (o nome da família do subset é "Space Grotesk Light"):
 
-- Versão 0.1.1, alfa. Varredura, teste de envio (inclusive em quiz, com avanço automático e modo de espera), clientes, histórico e laudo funcionando em páginas reais.
+```
+printf '<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><dir>%s/assets/fonts</dir><include ignore_missing="yes">/etc/fonts/fonts.conf</include></fontconfig>' "$PWD" > /tmp/te-fonts.conf
+FONTCONFIG_FILE=/tmp/te-fonts.conf rsvg-convert -w 1200 -h 630 -o site/og.png site/og.svg
+```
+
+A varredura animada do hero é só CSS e JavaScript no próprio `index.html`: cada elemento com `data-t` aparece nesse tempo (ms) e `data-off` o esconde; o loop dura 10,5 s, tem botão de pausa na cena (que também pausa as animações CSS pela classe `.paused`), para quando a cena sai da tela ou a aba fica oculta, e mostra o estado final parado com `prefers-reduced-motion` ou em telas de até 960 px. A página inteira é legível sem JavaScript: a classe `js` no `<html>` é o que liga o efeito de entrada das seções.
+
+## Estado (04/11/2026)
+
+- Versão 0.3.0, alfa. Varredura, teste de envio (inclusive em quiz, com avanço automático e modo de espera), URL de teste com UTM (`src/utm.js`, modelo na engrenagem), projetos, histórico e laudo funcionando em páginas reais.
+- Identidade visual atual (04/11/2026): fundo `#07090D`, texto `#EDF1F7`, verde-sinal `#5BFFB0`, Space Grotesk + Inter + JetBrains Mono; a mesma na extensão (`panel.css`), no `mark.svg`, no `logo.svg`, nos ícones PNG e no site. A interface fala "projeto" (no código os nomes continuam `clients`).
 - Não iniciado: publicação na Chrome Web Store (a instalação é "sem compactação"), detecção de outros provedores de chat e formulário além dos listados em `scanner.js`.
 
 ## Pull requests

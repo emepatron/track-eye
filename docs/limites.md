@@ -4,7 +4,7 @@ O Track Eye enxerga o que o navegador enxerga. É muito, mas não é tudo. Estes
 
 ## API de Conversões (CAPI) e disparos no servidor
 
-Eventos enviados do servidor para a Meta ou para o Google não passam pelo navegador. O Track Eye não os vê. Se a conversão do cliente é só por CAPI, o teste de envio vai dizer que a Meta não recebeu `Lead` pelo navegador, e isso pode estar certo. Confira no Gerenciador de Eventos da Meta.
+Eventos enviados do servidor para a Meta ou para o Google não passam pelo navegador. O Track Eye não os vê. Se a conversão da página é só por CAPI, o teste de envio vai dizer que a Meta não recebeu `Lead` pelo navegador, e isso pode estar certo. Confira no Gerenciador de Eventos da Meta.
 
 ## O que acontece dentro do GTM
 

@@ -2,3 +2,5 @@ node_modules/
 *.zip
 .DS_Store
 Thumbs.db
+# contexto de design local (não vai para o repositório público)
+PRODUCT.md
