@@ -64,6 +64,18 @@ test('regras: sem ViewContent vira atenção; sem UTM na página o link sem orig
   assert.equal(byId(res, 'buy-origin').status, 'warn');
 });
 
+test('checkout da própria loja: sem UTM no link vira informação se a origem está em cookie, atenção se não está', () => {
+  const scan = scanOf('loja.html', 'https://lojaexemplo.com.br/produto/tenis-exemplo/?utm_source=instagram');
+  const events = [ev('meta', { id: '1234567890123456', ev: 'PageView' })];
+  const semCookie = evaluate({ scan, events, navs: [{ t: t0, url: scan.url }] });
+  assert.equal(byId(semCookie, 'buy-origin-int').status, 'warn');
+  assert.equal(byId(semCookie, 'buy-origin'), undefined, 'não há checkout externo na loja');
+  scan.originStorage = ['cookie.utm_source', 'localStorage.utm_campaign'];
+  const comCookie = evaluate({ scan, events, navs: [{ t: t0, url: scan.url }] });
+  assert.equal(byId(comCookie, 'buy-origin-int').status, 'info');
+  assert.match(byId(comCookie, 'buy-origin-int').evidence, /cookie\.utm_source/);
+});
+
 test('teste de clique: InitiateCheckout, begin_checkout e checkout com origem passam', () => {
   const scan = scanOf('lp-vendas.html', 'https://curso.exemplo.com.br/?utm_source=instagram');
   const startedAt = t0 + 5000;

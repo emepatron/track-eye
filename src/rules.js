@@ -407,14 +407,32 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
       evidence: cm.funnelEvents.length ? `A página chamou ${cm.funnelEvents.join(', ')}, mas nada chegou à rede.` : 'Só PageView/page_view foram observados.',
       fix: 'Dispare ViewContent (com content_ids e value) e view_item ao carregar a página do produto. É o primeiro degrau do funil de compra nos relatórios e nas otimizações.' });
 
-    // Links de checkout levam a origem?
+    // Links de checkout levam a origem? Checkout em outro domínio (Hotmart, Kiwify) só
+    // recebe a origem pelo link. Checkout no mesmo domínio (loja própria, Cartpanda,
+    // Shopify) costuma ler a UTM de cookie ou storage; aí o link sem UTM não é falha.
     if (cm.checkoutLinks.length) {
-      const withOrigin = cm.checkoutLinks.filter((b) => b.originKeys.length);
       const hasUtm = Object.keys(scan.utm || {}).length > 0;
-      if (withOrigin.length === cm.checkoutLinks.length) add({ id: 'buy-origin', group: 'compra', status: STATUS.pass, title: `Link(s) de checkout levam a origem (${uniq(cm.checkoutLinks.flatMap((b) => b.originKeys)).join(', ')})`, evidence: cm.checkoutLinks.slice(0, 3).map((b) => `${b.text || b.host}: ${b.href.slice(0, 120)}`).join('\n') });
-      else add({ id: 'buy-origin', group: 'compra', status: hasUtm ? STATUS.fail : STATUS.warn, title: `${cm.checkoutLinks.length - withOrigin.length} de ${cm.checkoutLinks.length} link(s) de checkout sem origem (utm, src, sck)`,
-        evidence: cm.checkoutLinks.filter((b) => !b.originKeys.length).slice(0, 3).map((b) => `${b.text || b.host}: ${b.href.slice(0, 120)}`).join('\n') + (hasUtm ? '\nA página foi aberta com UTM e mesmo assim o link não a carrega.' : '\nAbra a página com UTM de teste para conferir se o link a repassa por JavaScript.'),
-        fix: 'Repasse a UTM da página para o link de checkout (na Hotmart, use src e sck; na Kiwify e nas outras, utm_source, utm_medium e utm_campaign). Sem isso a venda chega sem campanha e a atribuição some.' });
+      const sameHost = (b) => { try { return new URL(b.href).hostname === scan.host; } catch { return false; } };
+      const links = (list) => list.slice(0, 3).map((b) => `${b.text || b.host}: ${b.href.slice(0, 120)}`).join('\n');
+      const ext = cm.checkoutLinks.filter((b) => !sameHost(b));
+      const int = cm.checkoutLinks.filter(sameHost);
+      const stored = (scan.originStorage || []).filter((k) => /utm|fbclid|gclid|ttclid/i.test(k));
+      if (ext.length) {
+        const noOrigin = ext.filter((b) => !b.originKeys.length);
+        if (!noOrigin.length) add({ id: 'buy-origin', group: 'compra', status: STATUS.pass, title: `Link(s) de checkout externo levam a origem (${uniq(ext.flatMap((b) => b.originKeys)).join(', ')})`, evidence: links(ext) });
+        else add({ id: 'buy-origin', group: 'compra', status: hasUtm ? STATUS.fail : STATUS.warn, title: `${noOrigin.length} de ${ext.length} link(s) de checkout externo sem origem (utm, src, sck)`,
+          evidence: links(noOrigin) + (hasUtm ? '\nA página foi aberta com UTM e mesmo assim o link não a carrega. Em checkout de outro domínio, o link é o único caminho da origem.' : '\nAbra a página com UTM de teste para conferir se o link a repassa por JavaScript.'),
+          fix: 'Repasse a UTM da página para o link de checkout (na Hotmart, use src e sck; na Kiwify e nas outras, utm_source, utm_medium e utm_campaign). Sem isso a venda chega sem campanha e a atribuição some.' });
+      }
+      if (int.length) {
+        const noOrigin = int.filter((b) => !b.originKeys.length);
+        if (!noOrigin.length) add({ id: 'buy-origin-int', group: 'compra', status: STATUS.pass, title: `Link(s) de checkout da própria loja levam a origem (${uniq(int.flatMap((b) => b.originKeys)).join(', ')})`, evidence: links(int) });
+        else if (stored.length) add({ id: 'buy-origin-int', group: 'compra', status: STATUS.info, title: 'Checkout da própria loja: origem guardada em cookie ou storage, não no link',
+          evidence: `${stored.join(', ')}. ${noOrigin.length} link(s) sem UTM: ${links(noOrigin)}`, fix: 'A plataforma costuma ler a origem desse cookie no pedido. Confirme num pedido de teste que a campanha aparece; se não aparecer, repasse a UTM no link.' });
+        else add({ id: 'buy-origin-int', group: 'compra', status: STATUS.warn, title: `${noOrigin.length} de ${int.length} link(s) de checkout da própria loja sem origem, e nada guardado em cookie ou storage`,
+          evidence: links(noOrigin) + (hasUtm ? '\nA página foi aberta com UTM; nem o link nem o cookie a guardam.' : '\nAbra a página com UTM de teste para conferir se a loja grava a origem em cookie.'),
+          fix: 'Confira num pedido de teste se a plataforma registra a campanha. Se não registrar, repasse a UTM no link de checkout ou grave em cookie (a maioria das plataformas tem essa opção).' });
+      }
     }
 
     // Purchase: só com compra. Fica dito como não conferido.

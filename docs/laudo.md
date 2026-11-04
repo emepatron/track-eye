@@ -47,7 +47,9 @@
 
 **"Nenhum sinal de envio."** No teste, nenhuma requisição saiu, não houve redirect nem mensagem de sucesso. Validação, captcha ou etapa obrigatória barrou. Preencha na mão uma vez e observe o que falta.
 
-**"Link(s) de checkout sem origem (utm, src, sck)."** O botão de compra aponta para o checkout (Hotmart, Kiwify, carrinho da loja) sem repassar a origem da página. A venda chega sem campanha. Repasse os parâmetros no link ou por script; na Hotmart use `src` e `sck`.
+**"Link(s) de checkout externo sem origem (utm, src, sck)."** O botão de compra aponta para um checkout em outro domínio (Hotmart, Kiwify, Eduzz) sem repassar a origem da página. Ali o link é o único caminho: a venda chega sem campanha. Repasse os parâmetros no link ou por script; na Hotmart use `src` e `sck`.
+
+**"Checkout da própria loja: origem guardada em cookie ou storage, não no link."** O checkout é do mesmo domínio (loja própria, Cartpanda, Shopify) e a loja gravou a UTM em cookie ao abrir a página; a plataforma costuma ler dali no pedido. É informação, não falha. Confirme num pedido de teste que a campanha aparece. Se o laudo disser que nada foi guardado em cookie nem storage, aí é atenção: confira o pedido e, se a campanha não aparecer, repasse a UTM no link.
 
 **"Meta não recebeu InitiateCheckout após o clique."** No teste de clique de compra, o pixel existe mas nada saiu em 8 s. Dispare `InitiateCheckout` no clique do botão (no GTM, gatilho de clique no link do checkout).
 

@@ -103,7 +103,7 @@ O Track Eye só observa. Não bloqueia requisição, não altera a página, não
 
 ```bash
 npm install     # só jsdom, para os testes
-npm test        # 42 testes: scanner, regras, rede, laudo, quiz, widgets, UTM de teste e compra
+npm test        # 43 testes: scanner, regras, rede, laudo, quiz, widgets, UTM de teste e compra
 npm run icons   # regenera os ícones PNG
 ```
 
