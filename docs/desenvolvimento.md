@@ -64,7 +64,7 @@ O navegador guarda o ícone da barra em cache por versão da extensão. Ao mudar
 
 ## Site
 
-`site/index.html` é a landing page, em um arquivo só, com caminhos relativos (`../assets/...`) para abrir tanto do disco quanto servida. `site/Dockerfile` (nginx:alpine) e `site/nginx.conf` (headers de segurança, gzip, cache, redirects `/github` e `/download`) servem para qualquer host que aceite Dockerfile, com o contexto de build na raiz do repositório e o Dockerfile em `site/Dockerfile`.
+`site/index.html` é a landing page, em um arquivo só, com caminhos relativos (`../assets/...`) para abrir tanto do disco quanto servida. `site/Dockerfile` (nginx:alpine) e `site/nginx.conf` (headers de segurança, gzip, cache, redirects `/github` e `/download`) servem para qualquer host que aceite Dockerfile, com o contexto de build na raiz do repositório e o Dockerfile em `site/Dockerfile`. Em produção o site roda no Coolify da GS: `site/deploy-coolify.sh` cria o app (repositório público, Dockerfile, porta 80, domínio `trackeye.gsgrowthai.com`) ou dispara o redeploy do que já existe, lendo o token do vault `pass` na hora; depois de cada push na `main`, rode `bash site/deploy-coolify.sh --redeploy` (ou ligue o Auto Deploy por webhook no painel).
 
 A imagem de compartilhamento (`site/og.png`, 1200×630, usada em `og:image` e `twitter:image`) sai de `site/og.svg` pelo `rsvg-convert`. As fontes do SVG são as mesmas `.woff2` de `assets/fonts`, que o fontconfig só enxerga com um `fonts.conf` apontando para essa pasta (o nome da família do subset é "Space Grotesk Light"):
 
