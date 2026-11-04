@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Track Eye" width="560">
+  <img src="assets/logo.png" alt="Track Eye" width="560">
 </p>
 
 <p align="center">
