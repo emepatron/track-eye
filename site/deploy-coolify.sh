@@ -115,17 +115,25 @@ else
   echo "App criado: $APP_NAME ($APP_UUID) com deploy imediato."
 fi
 
-# ---- acompanha o último deployment ----
-echo "Aguardando o deploy…"
-for i in $(seq 1 60); do
+# ---- acompanha o deploy ----
+# Enquanto o build roda, o app aparece como "exited:unhealthy" (ainda não subiu); o que
+# diz se terminou é a fila de deployments. Só é falha se a fila esvaziar e o app não estiver "running".
+echo "Aguardando o deploy (até 10 min)…"
+OK=0
+for i in $(seq 1 120); do
   sleep 5
   STATUS="$(api GET "/applications/$APP_UUID" | jq -r '.status // "?"')"
-  printf '  %3ds  %s\n' $((i*5)) "$STATUS"
+  PENDING="$(api GET /deployments 2>/dev/null | jq -r --arg u "$APP_UUID" '[.[]? | select(.application_uuid==$u or .application_id==$u)] | length' 2>/dev/null || echo 0)"
+  printf '  %3ds  app: %-18s deploys na fila: %s\n' $((i*5)) "$STATUS" "$PENDING"
   case "$STATUS" in
-    running*) break ;;
-    exited*|*failed*|*error*) echo "Deploy terminou com problema ($STATUS). Veja os logs no painel: $BASE" >&2; exit 1 ;;
+    running*) OK=1; break ;;
   esac
+  if [ "$PENDING" = "0" ] && [ "$i" -gt 6 ]; then
+    echo "A fila esvaziou e o app ficou em '$STATUS'. Veja os logs no painel: $BASE" >&2
+    exit 1
+  fi
 done
+[ "$OK" -eq 1 ] || { echo "Passaram 10 min e o app não ficou 'running'. Veja o painel: $BASE" >&2; exit 1; }
 
 echo
 echo "Pronto. Confira:"
