@@ -71,6 +71,7 @@ if [ -n "$EXISTING" ]; then
   DEPLOY="$(api POST "/deploy" "{\"uuid\":\"$EXISTING\",\"force\":true}")"
   echo "$DEPLOY" | jq -r '.deployments[]? | "  \(.message // "deploy") · deployment \(.deployment_uuid // "?")"' 2>/dev/null || echo "$DEPLOY"
   APP_UUID="$EXISTING"
+  DEPLOYMENT_UUID="$(echo "$DEPLOY" | jq -r '.deployments[0].deployment_uuid // empty' 2>/dev/null || true)"
 else
   [ "$REDEPLOY" -eq 1 ] && { echo "Não achei o app para redeployar. Rode sem --redeploy para criar." >&2; exit 1; }
 
@@ -116,24 +117,27 @@ else
 fi
 
 # ---- acompanha o deploy ----
-# Enquanto o build roda, o app aparece como "exited:unhealthy" (ainda não subiu); o que
-# diz se terminou é a fila de deployments. Só é falha se a fila esvaziar e o app não estiver "running".
+# No redeploy a API devolve o uuid do deployment: é ele que diz quando o build acabou
+# (o app continua "running" com o container antigo enquanto isso). Na criação não há
+# uuid; aí o app fica "exited:unhealthy" até o primeiro build terminar e virar "running".
 echo "Aguardando o deploy (até 10 min)…"
 OK=0
 for i in $(seq 1 120); do
   sleep 5
-  STATUS="$(api GET "/applications/$APP_UUID" | jq -r '.status // "?"')"
-  PENDING="$(api GET /deployments 2>/dev/null | jq -r --arg u "$APP_UUID" '[.[]? | select(.application_uuid==$u or .application_id==$u)] | length' 2>/dev/null || echo 0)"
-  printf '  %3ds  app: %-18s deploys na fila: %s\n' $((i*5)) "$STATUS" "$PENDING"
-  case "$STATUS" in
-    running*) OK=1; break ;;
-  esac
-  if [ "$PENDING" = "0" ] && [ "$i" -gt 6 ]; then
-    echo "A fila esvaziou e o app ficou em '$STATUS'. Veja os logs no painel: $BASE" >&2
-    exit 1
+  if [ -n "${DEPLOYMENT_UUID:-}" ]; then
+    DSTATUS="$(api GET "/deployments/$DEPLOYMENT_UUID" | jq -r '.status // "?"')"
+    printf '  %3ds  deployment: %s\n' $((i*5)) "$DSTATUS"
+    case "$DSTATUS" in
+      finished) OK=1; break ;;
+      failed|cancelled*) echo "Deploy $DSTATUS. Veja os logs no painel: $BASE" >&2; exit 1 ;;
+    esac
+  else
+    STATUS="$(api GET "/applications/$APP_UUID" | jq -r '.status // "?"')"
+    printf '  %3ds  app: %s\n' $((i*5)) "$STATUS"
+    case "$STATUS" in running*) OK=1; break ;; esac
   fi
 done
-[ "$OK" -eq 1 ] || { echo "Passaram 10 min e o app não ficou 'running'. Veja o painel: $BASE" >&2; exit 1; }
+[ "$OK" -eq 1 ] || { echo "Passaram 10 min sem terminar. Veja o painel: $BASE" >&2; exit 1; }
 
 echo
 echo "Pronto. Confira:"
