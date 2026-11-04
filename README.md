@@ -7,6 +7,7 @@
 </p>
 
 <p align="center">
+  <a href="https://trackeye.gsgrowthai.com">Site</a> ·
   <a href="#instalar-em-um-minuto">Instalar</a> ·
   <a href="#o-que-ele-confere">O que ele confere</a> ·
   <a href="docs/guia.md">Guia de uso</a> ·
