@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Track Eye · Raio-X de rastreamento de landing pages</title>
+  <meta name="description" content="Extensão de navegador, grátis e open source, que confere em segundos se a sua landing page está rastreando de verdade: tags, WhatsApp, formulários, UTM e teste de envio, com laudo pronto.">
+  <meta property="og:title" content="Track Eye · Raio-X de rastreamento de landing pages">
+  <meta property="og:description" content="Abra a landing page, clique no olho e saiba se pixel, GA4, WhatsApp, formulário e UTM estão certos. Grátis, open source, sem conta.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://trackeye.gsgrowthai.com/">
+  <link rel="icon" href="/assets/icons/icon-48.png" type="image/png">
+  <style>
+    @font-face { font-family: 'Space Grotesk'; font-weight: 500; src: url('/assets/fonts/space-grotesk-latin-500-normal.woff2') format('woff2'); font-display: swap; }
+    @font-face { font-family: 'Space Grotesk'; font-weight: 700; src: url('/assets/fonts/space-grotesk-latin-700-normal.woff2') format('woff2'); font-display: swap; }
+    @font-face { font-family: 'Inter'; font-weight: 400; src: url('/assets/fonts/inter-latin-400-normal.woff2') format('woff2'); font-display: swap; }
+    @font-face { font-family: 'Inter'; font-weight: 500; src: url('/assets/fonts/inter-latin-500-normal.woff2') format('woff2'); font-display: swap; }
+    @font-face { font-family: 'Inter'; font-weight: 600; src: url('/assets/fonts/inter-latin-600-normal.woff2') format('woff2'); font-display: swap; }
+    @font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url('/assets/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2'); font-display: swap; }
+    @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('/assets/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2'); font-display: swap; }
+
+    :root {
+      --bg: #070708; --bg-2: #0C0C0E; --surface: #121214; --surface-2: #19191C;
+      --line: rgba(255,255,255,0.07); --line-2: rgba(255,255,255,0.13);
+      --text: #F5F4F1; --text-2: #B9B9C0; --text-3: #8A8A92;
+      --brand: #FF5C4D; --brand-2: #FF8A7A; --brand-3: #FFB8AE; --brand-deep: #D93B2C;
+      --pass: #2EE59D; --warn: #FFB020; --info: #5BA8FF; --unknown: #8A8A92;
+      --display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+      --body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+      --radius: 18px; --radius-s: 12px; --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(255,92,77,0.35); }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+    h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+    h2 { font-size: clamp(28px, 4vw, 40px); }
+    h3 { font-size: 18px; }
+    p { margin: 0; }
+    .muted { color: var(--text-3); }
+    .mono { font-family: var(--mono); }
+    .grad { background: linear-gradient(90deg, var(--brand), var(--brand-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-2); margin-bottom: 14px; display: inline-flex; align-items: center; gap: 8px; }
+    .eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--brand); }
+    section { padding: 96px 0; position: relative; }
+    .sec-head { max-width: 680px; margin-bottom: 48px; }
+    .sec-head p { color: var(--text-2); font-size: 17px; margin-top: 14px; }
+
+    /* ---------- botões ---------- */
+    .btn { display: inline-flex; align-items: center; gap: 9px; padding: 13px 20px; border-radius: 13px; font-weight: 600; font-size: 15px; border: 1px solid transparent; transition: .18s; white-space: nowrap; cursor: pointer; }
+    .btn-primary { color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-deep)); box-shadow: 0 10px 34px rgba(255,92,77,0.3), inset 0 1px 0 rgba(255,255,255,0.18); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 42px rgba(255,92,77,0.42), inset 0 1px 0 rgba(255,255,255,0.18); }
+    .btn-ghost { background: rgba(255,255,255,0.03); border-color: var(--line-2); color: var(--text); }
+    .btn-ghost:hover { background: var(--surface-2); border-color: rgba(255,255,255,0.22); }
+    .btn svg { width: 18px; height: 18px; }
+
+    /* ---------- nav ---------- */
+    .nav { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); background: rgba(7,7,8,0.72); border-bottom: 1px solid var(--line); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; letter-spacing: 0.14em; font-size: 14px; }
+    .brand img { width: 30px; height: 30px; filter: drop-shadow(0 0 12px rgba(255,92,77,0.5)); }
+    .brand span { color: var(--brand-2); }
+    .nav-links { display: flex; gap: 26px; font-size: 14px; color: var(--text-2); }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { display: flex; gap: 10px; }
+    .nav .btn { padding: 9px 14px; font-size: 13.5px; }
+    @media (max-width: 860px) { .nav-links { display: none; } }
+
+    /* ---------- hero ---------- */
+    .hero { padding: 92px 0 70px; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: -40% -10% auto; height: 700px; background: radial-gradient(800px 420px at 30% 30%, rgba(255,92,77,0.18), transparent 60%), radial-gradient(600px 400px at 80% 20%, rgba(255,184,174,0.08), transparent 60%); pointer-events: none; }
+    .hero .wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; position: relative; }
+    .hero h1 { font-size: clamp(38px, 5.4vw, 64px); }
+    .hero .lead { font-size: 19px; color: var(--text-2); margin: 22px 0 30px; max-width: 540px; }
+    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
+    .badge { font-family: var(--mono); font-size: 11.5px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.02); color: var(--text-2); }
+    .badge b { color: var(--pass); font-weight: 600; }
+    @media (max-width: 960px) { .hero .wrap { grid-template-columns: 1fr; } .hero { padding-top: 56px; } }
+
+    /* ---------- mock do painel ---------- */
+    .panel { width: 100%; max-width: 420px; margin: 0 auto; background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 22px; padding: 16px; box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,92,77,0.08), 0 0 80px rgba(255,92,77,0.08); font-size: 13px; position: relative; }
+    .panel::after { content: ''; position: absolute; inset: auto -30% -40% auto; width: 240px; height: 240px; border-radius: 50%; background: var(--brand); filter: blur(90px); opacity: .28; pointer-events: none; }
+    .p-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .p-top .brand { font-size: 12px; }
+    .p-tabs { display: grid; grid-template-columns: repeat(3,1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin-bottom: 12px; font-size: 12px; color: var(--text-3); text-align: center; }
+    .p-tabs span { padding: 6px 0; border-radius: 8px; }
+    .p-tabs .on { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+    .p-page { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 12px 12px 12px 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
+    .p-page::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--brand), var(--brand-3)); }
+    .p-page b { font-family: var(--display); display: block; font-size: 13.5px; }
+    .p-page .mono { color: var(--text-3); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .p-client { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(255,92,77,0.4); background: rgba(255,92,77,0.1); color: var(--brand-3); }
+    .p-client i { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 8px var(--brand); }
+    .p-verdict { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
+    .p-verdict::after { content: ''; position: absolute; right: -60px; bottom: -80px; width: 180px; height: 180px; border-radius: 50%; background: var(--pass); filter: blur(50px); opacity: .4; }
+    .p-verdict b { font-family: var(--display); font-size: 24px; letter-spacing: .06em; color: var(--pass); display: block; line-height: 1; }
+    .p-verdict span { color: var(--text-2); font-size: 12px; display: block; margin-top: 4px; }
+    .p-counts { display: flex; gap: 6px; margin-top: 10px; }
+    .p-counts em { font-style: normal; font-family: var(--mono); font-size: 10.5px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2); }
+    .p-counts em b { font-size: 10.5px; display: inline; letter-spacing: 0; }
+    .p-counts .w b { color: var(--warn); } .p-counts .p b { color: var(--pass); } .p-counts .u b { color: var(--unknown); }
+    .p-group { font-family: var(--display); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin: 10px 2px 5px; }
+    .p-check { display: grid; grid-template-columns: 8px 1fr; gap: 9px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 8px 11px; margin-bottom: 5px; }
+    .p-check i { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; background: var(--c); box-shadow: 0 0 9px var(--c); }
+    .p-check.pass { --c: var(--pass); } .p-check.warn { --c: var(--warn); } .p-check.fail { --c: var(--brand); } .p-check.unknown { --c: var(--unknown); }
+    .p-check.fail { border-color: rgba(255,92,77,0.35); }
+    .p-check small { display: block; color: var(--text-3); font-family: var(--mono); font-size: 10px; margin-top: 2px; }
+    .p-check .ev { margin-top: 6px; font-family: var(--mono); font-size: 10.5px; color: var(--text-2); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+
+    /* ---------- cards ---------- */
+    .grid { display: grid; gap: 14px; }
+    .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 900px) { .g3, .g4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; transition: .2s; position: relative; overflow: hidden; }
+    .card:hover { border-color: rgba(255,92,77,0.35); transform: translateY(-2px); }
+    .card h3 { margin-bottom: 8px; }
+    .card p { color: var(--text-2); font-size: 14.5px; }
+    .card .ico { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: rgba(255,92,77,0.1); border: 1px solid rgba(255,92,77,0.3); color: var(--brand-2); margin-bottom: 16px; }
+    .card .ico svg { width: 20px; height: 20px; }
+    .card ul { margin: 12px 0 0; padding: 0; list-style: none; color: var(--text-2); font-size: 13.5px; }
+    .card li { padding-left: 16px; position: relative; margin-bottom: 5px; }
+    .card li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+    .pain { border-color: rgba(255,92,77,0.18); }
+    .pain .tag { font-family: var(--mono); font-size: 11px; color: var(--brand-2); letter-spacing: .08em; text-transform: uppercase; }
+    .pain h3 { font-size: 17px; margin: 10px 0 8px; }
+
+    /* ---------- passos ---------- */
+    .steps { counter-reset: s; }
+    .step { display: grid; grid-template-columns: 56px 1fr; gap: 18px; padding: 22px 0; border-top: 1px solid var(--line); }
+    .step:last-child { border-bottom: 1px solid var(--line); }
+    .step::before { counter-increment: s; content: counter(s, decimal-leading-zero); font-family: var(--display); font-weight: 700; font-size: 28px; background: linear-gradient(180deg, var(--brand), var(--brand-3)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+    .step h3 { margin-bottom: 6px; }
+    .step p { color: var(--text-2); font-size: 15px; }
+
+    /* ---------- laudo ---------- */
+    .laudo { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 26px 28px; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--text-2); }
+    .laudo h4 { font-family: var(--display); color: var(--text); font-size: 15px; margin: 0 0 8px; }
+    .laudo .h { color: var(--text); margin-top: 18px; font-weight: 600; }
+    .laudo .l { padding-left: 22px; position: relative; }
+    .laudo .l::before { position: absolute; left: 0; }
+    .laudo .ok::before { content: '✅'; } .laudo .at::before { content: '⚠️'; } .laudo .cr::before { content: '🔴'; } .laudo .nd::before { content: '⬜'; }
+    .laudo .sub { padding-left: 44px; color: var(--text-3); }
+    .laudo .sub b { color: var(--brand-3); font-weight: 600; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+    @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+
+    /* ---------- quem ---------- */
+    .who { display: grid; grid-template-columns: 220px 1fr; gap: 20px; padding: 20px 0; border-top: 1px solid var(--line); align-items: start; }
+    .who:last-child { border-bottom: 1px solid var(--line); }
+    .who b { font-family: var(--display); font-size: 17px; }
+    .who p { color: var(--text-2); font-size: 15px; }
+    @media (max-width: 700px) { .who { grid-template-columns: 1fr; gap: 6px; } }
+
+    /* ---------- princípios ---------- */
+    .principles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 760px) { .principles { grid-template-columns: 1fr; } }
+    .quote { font-family: var(--display); font-size: clamp(22px, 2.8vw, 30px); line-height: 1.3; color: var(--text); padding: 30px; border-radius: var(--radius); background: linear-gradient(135deg, rgba(255,92,77,0.14), rgba(255,92,77,0.03)); border: 1px solid rgba(255,92,77,0.3); }
+
+    /* ---------- instalar ---------- */
+    .install { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    @media (max-width: 900px) { .install { grid-template-columns: 1fr; padding: 26px; } }
+    .install ol { margin: 18px 0 0; padding-left: 22px; color: var(--text-2); font-size: 15px; }
+    .install li { margin-bottom: 10px; }
+    .install code { font-family: var(--mono); font-size: 13px; background: var(--bg); border: 1px solid var(--line); padding: 2px 7px; border-radius: 6px; color: var(--text); }
+    .note { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: rgba(255,176,32,0.08); border: 1px solid rgba(255,176,32,0.3); color: var(--text-2); font-size: 14px; }
+    .note b { color: var(--warn); }
+
+    /* ---------- faq ---------- */
+    details { border-top: 1px solid var(--line); padding: 18px 0; }
+    details:last-of-type { border-bottom: 1px solid var(--line); }
+    summary { cursor: pointer; list-style: none; font-family: var(--display); font-weight: 700; font-size: 17px; display: flex; justify-content: space-between; gap: 20px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; color: var(--brand-2); font-family: var(--mono); font-size: 20px; }
+    details[open] summary::after { content: '−'; }
+    details p { color: var(--text-2); margin-top: 10px; font-size: 15px; max-width: 760px; }
+
+    footer { padding: 50px 0 40px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 14px; }
+    footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
+    footer a { color: var(--text-2); }
+    footer a:hover { color: var(--text); }
+    .reveal { opacity: 0; transform: translateY(14px); transition: .6s ease-out; }
+    .reveal.in { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="#"><img src="/assets/mark.svg" alt="">TRACK <span>EYE</span></a>
+      <div class="nav-links">
+        <a href="#como">Como funciona</a>
+        <a href="#confere">O que confere</a>
+        <a href="#quem">Para quem</a>
+        <a href="#instalar">Instalar</a>
+        <a href="#faq">Dúvidas</a>
+      </div>
+      <div class="nav-cta">
+        <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub</a>
+        <a class="btn btn-primary" href="#instalar">Instalar grátis</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">Extensão open source para Chrome, Brave e Edge</div>
+        <h1>Sua landing page está <span class="grad">rastreando de verdade?</span></h1>
+        <p class="lead">Abra a página, clique no olho e em segundos você sabe se o pixel dispara, se o WhatsApp aponta para o número certo, se a UTM chega no CRM e se o formulário gera Lead. Com laudo pronto para colar no grupo.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#instalar">Instalar em um minuto</a>
+          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank">Ver o código</a>
+        </div>
+        <div class="badges">
+          <span class="badge"><b>MIT</b> · código aberto</span>
+          <span class="badge">sem conta</span>
+          <span class="badge">sem servidor</span>
+          <span class="badge">roda só no seu navegador</span>
+        </div>
+      </div>
+      <div class="panel" aria-hidden="true">
+        <div class="p-top">
+          <a class="brand" href="#"><img src="/assets/mark.svg" alt="">TRACK <span>EYE</span></a>
+          <span class="mono muted" style="font-size:10px">v0.1.0</span>
+        </div>
+        <div class="p-tabs"><span class="on">Varredura</span><span>Clientes</span><span>Histórico</span></div>
+        <div class="p-page">
+          <b>Clínica Exemplo · Agende sua avaliação</b>
+          <div class="mono">https://lp.clinicaexemplo.com.br/?utm_source=instagram&amp;utm_campaign=novembro</div>
+          <span class="p-client"><i></i>Clínica Exemplo</span>
+        </div>
+        <div class="p-verdict">
+          <b>VERDE</b><span>Pode subir campanha</span>
+          <div class="p-counts"><em class="p"><b>9</b> em ordem</em><em class="w"><b>1</b> atenção</em><em class="u"><b>2</b> não conferido</em></div>
+        </div>
+        <div class="p-group">Teste de envio</div>
+        <div class="p-check pass"><i></i><div>Meta recebeu Lead (3333000033330000)<small>Em ordem</small></div></div>
+        <div class="p-check pass"><i></i><div>Origem foi junto no envio (utm_source, utm_campaign)<small>Em ordem</small></div></div>
+        <div class="p-group">Tags</div>
+        <div class="p-check pass"><i></i><div>GA4 disparando (G-EXEMPLO001)<small>page_view enviado 1x</small></div></div>
+        <div class="p-check warn"><i></i><div>Sem Microsoft Clarity<small>Atenção</small><div class="ev">Clarity é gratuito e mostra onde o visitante trava. Instale pelo GTM.</div></div></div>
+        <div class="p-group">WhatsApp</div>
+        <div class="p-check pass"><i></i><div>WhatsApp (11) 99999-0000 confere com o cadastro<small>topo, flutuante</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problema">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">A cena que todo mundo conhece</div>
+        <h2>O cliente diz que "o tráfego não converte". Na maioria das vezes, era tracking.</h2>
+        <p>A página vai ao ar, o anúncio roda, a verba sai. Dias depois alguém descobre o que estava quebrado desde o primeiro dia. Conferir na mão leva meia hora, então ninguém confere.</p>
+      </div>
+      <div class="grid g4">
+        <div class="card pain reveal"><span class="tag">Caso 1</span><h3>O pixel estava no código, mas não disparava</h3><p>A Meta otimizou por clique durante semanas. O gerenciador mostrava zero conversões e a culpa caiu no criativo.</p></div>
+        <div class="card pain reveal"><span class="tag">Caso 2</span><h3>Botão de WhatsApp com número antigo</h3><p>Lead clicava, caía em um número que ninguém atendia. A campanha "não trazia lead".</p></div>
+        <div class="card pain reveal"><span class="tag">Caso 3</span><h3>Página de obrigado que parou de contar</h3><p>Uma mudança no builder quebrou o redirect. O Google Ads ficou cego e a campanha perdeu o aprendizado.</p></div>
+        <div class="card pain reveal"><span class="tag">Caso 4</span><h3>UTM que se perdia no caminho</h3><p>O lead chegava no CRM sem origem. Impossível saber qual campanha estava pagando a conta.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <div class="eyebrow">Como funciona</div>
+          <h2>Três cliques entre a dúvida e o laudo.</h2>
+          <p class="muted" style="margin-top:14px;font-size:17px">Nada de GTM Preview, gerenciador de anúncios ou código-fonte. O Track Eye observa o que a página faz de verdade no navegador e cruza com o que está no código.</p>
+        </div>
+        <div class="steps reveal">
+          <div class="step"><div><h3>Abra a landing page</h3><p>De preferência pelo link final do anúncio, com UTM. Assim ele testa também se a origem chega onde precisa.</p></div></div>
+          <div class="step"><div><h3>Clique no olho e em "Varrer página"</h3><p>Em segundos: tags no código e disparando, links de WhatsApp, formulários, UTM e saúde da página. Cada item com evidência e o que fazer.</p></div></div>
+          <div class="step"><div><h3>Copie o laudo</h3><p>Verde, amarelo ou vermelho. Markdown completo para justificar uma correção, resumo curto para o grupo do cliente, print e histórico.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="confere">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">O que ele confere</div>
+        <h2>Vê o que disparou, não só o que está no código.</h2>
+        <p>Um pixel "instalado" não vale nada se não dispara. O Track Eye observa as requisições de rede da aba e diz o que aconteceu de verdade.</p>
+      </div>
+      <div class="grid g3">
+        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h3>Tags</h3><p>GTM, GA4, pixel da Meta, Google Ads, Clarity, Hotjar, TikTok.</p><ul><li>No código e carregado de verdade</li><li>page_view e PageView disparando</li><li>Pixel duplicado, mais de um container</li><li>Pixel dentro de iframe, separado do da página</li></ul></div>
+        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a8 8 0 0 1-11.8 7L4 19.5l1.1-4A8 8 0 1 1 20 11.5z"/></svg></div><h3>WhatsApp</h3><p>Todo botão e link, inclusive os que abrem por JavaScript.</p><ul><li>Número conferido com o cadastro do cliente</li><li>Mensagem pré-preenchida e origem</li><li>Botão flutuante, shadow DOM, chatbot</li><li>Chats conhecidos (LeadConnector, Typebot, ManyChat e mais)</li></ul></div>
+        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div><h3>Formulários</h3><p>Elementor, Contact Form 7, HubSpot, RD, GoHighLevel, webhook, React, quiz.</p><ul><li>Campos, destino e provedor</li><li>Formulário em iframe e sem &lt;form&gt;</li><li>Oculto atrás de etapas</li><li>Captcha e HTTP sem criptografia</li></ul></div>
+        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M12 4l8 8-8 8"/></svg></div><h3>UTM</h3><p>A origem precisa sobreviver ao caminho inteiro.</p><ul><li>Parâmetros na URL</li><li>Propagação para os links de WhatsApp</li><li>Campos ocultos preenchidos</li><li>Chaves de UTM no corpo do envio ao CRM</li></ul></div>
+        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg></div><h3>Saúde da página</h3><p>O básico que derruba conversão sem ninguém perceber.</p><ul><li>HTTPS</li><li>CSS que não carregou (cache vazio)</li><li>Erros de JavaScript</li><li>Title, viewport, tempo de carregamento</li></ul></div>
+        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4L19 6"/></svg></div><h3>Teste de envio</h3><p>Envia um lead de teste e observa o que acontece.</p><ul><li>Percorre o quiz sozinho até o formulário</li><li>Requisição saiu, obrigado ou mensagem de sucesso</li><li>Lead na Meta, generate_lead no GA4, conversão no Ads</li><li>Origem no corpo do envio</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="laudo">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <div class="eyebrow">O laudo</div>
+          <h2>Três blocos, zero achismo.</h2>
+          <p class="muted" style="margin-top:14px;font-size:17px">Achados com evidência e correção. O que passou, como prova de trabalho. E o que não deu para conferir, dito como "não deu para conferir". O Track Eye nunca inventa um erro para parecer útil.</p>
+          <div class="principles" style="margin-top:28px">
+            <div class="card"><h3>Para o gestor de tráfego</h3><p>LP sem laudo verde não entra em campanha. Dois minutos antes de publicar.</p></div>
+            <div class="card"><h3>Para o cliente</h3><p>"LP auditada em tal data, estava verde." Prova de trabalho que cabe numa mensagem.</p></div>
+          </div>
+        </div>
+        <div class="laudo reveal">
+          <h4>Track Eye · Laudo de rastreamento</h4>
+          <div>Cliente: Clínica Exemplo · Veredito: 🟡 AMARELO</div>
+          <div class="h">Achados</div>
+          <div class="l at">Sem Microsoft Clarity (Tags)</div>
+          <div class="sub"><b>O que fazer:</b> Clarity é gratuito e mostra onde o visitante trava. Instale pelo GTM.</div>
+          <div class="l at">1 de 2 links de WhatsApp sem mensagem pré-preenchida</div>
+          <div class="sub"><b>O que fazer:</b> adicione ?text= com a origem para o comercial saber de onde o lead veio.</div>
+          <div class="h">Em ordem</div>
+          <div class="l ok">GTM carregado (GTM-EXEMPL02)</div>
+          <div class="l ok">GA4 disparando (G-EXEMPLO001)</div>
+          <div class="l ok">Pixel da Meta disparando (3333000033330000)</div>
+          <div class="l ok">WhatsApp (11) 99999-0000 confere com o cadastro</div>
+          <div class="l ok">Meta recebeu Lead após o envio</div>
+          <div class="l ok">Origem foi junto no envio (utm_source, utm_campaign)</div>
+          <div class="h">Não deu para conferir</div>
+          <div class="l nd">Botão "Falar no WhatsApp" abre por JavaScript: confira o número na mão</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quem">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Para quem</div>
+        <h2>Operação e comercial usam o mesmo olho, para coisas diferentes.</h2>
+      </div>
+      <div class="reveal">
+        <div class="who"><b>Gestor de tráfego</b><p>Gate antes de subir campanha. Em vez de descobrir o pixel quebrado no relatório da semana 3, descobre no minuto 1. E documenta o teste com o laudo.</p></div>
+        <div class="who"><b>Account e CS</b><p>Quando o cliente diz que "o tráfego não converte", a resposta vem em dois minutos e com evidência. E toda LP entregue sai com laudo verde, que vale como prova de trabalho no check-in.</p></div>
+        <div class="who"><b>Comercial e pré-venda</b><p>Na reunião com o prospect, abre a página dele e mostra ao vivo o que está quebrado. É diagnóstico concreto, não promessa. Vira proposta na hora.</p></div>
+        <div class="who"><b>Dev e implementador de LP</b><p>Checklist de entrega: tags, formulário, UTM e teste de envio, sem GTM Preview. Em quiz e formulário dentro de iframe também.</p></div>
+        <div class="who"><b>Dono de negócio</b><p>Confere o que a agência entregou sem depender de ninguém. O laudo é legível por quem não é técnico.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="principios">
+    <div class="wrap">
+      <div class="principles">
+        <div class="quote reveal">"Só afirma o que teve evidência. O que não deu para conferir fica dito como não conferido."</div>
+        <div class="reveal">
+          <div class="eyebrow">Princípios</div>
+          <h3 style="font-size:22px;margin-bottom:10px">Só observa</h3>
+          <p class="muted">Não bloqueia requisição, não altera a página, não manda nada para fora do seu navegador. Sem servidor, sem conta, sem telemetria. O cadastro de clientes e o histórico ficam no seu navegador; você exporta um JSON quando quiser compartilhar com o time.</p>
+          <h3 style="font-size:22px;margin:22px 0 10px">Honesto sobre os limites</h3>
+          <p class="muted">Bloqueador de anúncios no seu navegador, iframe que não responde, captcha, eventos enviados pelo servidor (CAPI): o laudo diz quando não enxergou, em vez de culpar a página. A única ação que sai da sua máquina é o teste de envio, feito de propósito e com aviso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="instalar">
+    <div class="wrap">
+      <div class="install reveal">
+        <div>
+          <div class="eyebrow">Instalar</div>
+          <h2>Um minuto, sem loja, sem cadastro.</h2>
+          <ol>
+            <li>Baixe o código: <a class="grad" href="/download">ZIP do repositório</a> e descompacte.</li>
+            <li>Abra <code>chrome://extensions</code> (no Brave, <code>brave://extensions</code>; no Edge, <code>edge://extensions</code>).</li>
+            <li>Ligue o <strong>Modo do desenvolvedor</strong>, no canto superior direito.</li>
+            <li>Clique em <strong>Carregar sem compactação</strong> e escolha a pasta <code>track-eye</code>.</li>
+            <li>Fixe o ícone do olho na barra. Abra uma landing page e clique nele.</li>
+          </ol>
+          <div class="note"><b>Usa Brave ou bloqueador de anúncios?</b> Desligue para o site que vai auditar. Senão o navegador barra o GTM e o laudo avisa "navegador bloqueando rastreadores" em vez de auditar.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+          <a class="btn btn-primary" href="/download">Baixar o Track Eye (.zip)</a>
+          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank">Ver no GitHub</a>
+          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye/blob/main/docs/guia.md" rel="noopener noreferrer" target="_blank">Ler o guia de uso</a>
+          <p class="muted" style="font-size:13.5px;margin-top:8px">Chrome, Brave, Edge e qualquer Chromium 116 ou mais novo. Firefox e Safari ainda não.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head reveal"><div class="eyebrow">Dúvidas</div><h2>Perguntas que aparecem no primeiro dia.</h2></div>
+      <div class="reveal">
+        <details><summary>Funciona em quiz e em formulário dentro de iframe?</summary><p>Sim. O teste de envio percorre o quiz sozinho (primeira opção de cada etapa, "Continuar" quando existe) até o formulário aparecer; se não conseguir, espera você chegar lá e envia na hora. A varredura roda em todos os frames da aba, então formulários embutidos de CRM entram no laudo com campos, captcha e provedor.</p></details>
+        <details><summary>O teste de envio cria um lead de verdade?</summary><p>Cria, de propósito. O lead chega como "TESTE TRACK EYE", com e-mail e telefone de teste que você configura. É a única forma de provar que o Lead dispara na Meta, que o GA4 conta e que a UTM chega no CRM. Avise quem atende para apagar.</p></details>
+        <details><summary>Preciso de conta, chave ou servidor?</summary><p>Não. Tudo roda no seu navegador. Não existe backend, login nem telemetria. O cadastro de clientes é um JSON que você exporta e compartilha com o time.</p></details>
+        <details><summary>Ele vê a configuração do GTM?</summary><p>Ele vê o resultado do GTM (o que disparou nesta visita), não a configuração (tags, gatilhos, Conversion Linker). Para auditar o container por dentro, continue usando o GTM Preview. Eventos enviados pelo servidor (CAPI) também ficam fora.</p></details>
+        <details><summary>Por que o laudo deu vermelho numa página que eu sei que está certa?</summary><p>Quase sempre é bloqueador de anúncios ou Brave Shields no seu navegador barrando o GTM. O Track Eye detecta isso e avisa; desligue o bloqueio para o site, recarregue e varra de novo. Se não for isso, abra uma issue no GitHub com o laudo e a URL.</p></details>
+        <details><summary>Posso usar com meus clientes e cobrar por isso?</summary><p>Pode. A licença é MIT: use, modifique, distribua, inclusive comercialmente. Se melhorar algo, manda um pull request.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div><a class="brand" href="#"><img src="/assets/mark.svg" alt="">TRACK <span>EYE</span></a><p style="margin-top:8px">Feito por <a href="https://github.com/emepatron" rel="noopener noreferrer" target="_blank">Emerson Serra</a> para quem já perdeu verba por causa de uma tag que não disparava.</p></div>
+      <div style="display:flex;gap:18px"><a href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank">GitHub</a><a href="https://github.com/emepatron/track-eye/blob/main/docs/guia.md" rel="noopener noreferrer" target="_blank">Guia</a><a href="https://github.com/emepatron/track-eye/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">Licença MIT</a></div>
+    </div>
+  </footer>
+
+  <script>
+    const io = new IntersectionObserver((entries) => { for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>

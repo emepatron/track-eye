@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><title>Quiz de teste</title></head>
+<body>
+  <section id="quiz">
+    <div class="etapa" data-etapa="1">
+      <h3>Até quanto quer investir?</h3>
+      <div class="opcoes" data-campo="faixa">
+        <button type="button" data-valor="ate_80" aria-pressed="false"><span>01</span>Até R$ 80 mil</button>
+        <button type="button" data-valor="acima" aria-pressed="false"><span>02</span>Acima</button>
+      </div>
+    </div>
+    <div class="etapa" data-etapa="2" style="display:none">
+      <h3>Como pretende dar entrada?</h3>
+      <div class="opcoes" data-campo="entrada">
+        <button type="button" data-valor="pix" aria-pressed="false">Pix</button>
+        <button type="button" data-valor="troca" aria-pressed="false">Troca</button>
+      </div>
+      <label>Valor (opcional)<input id="entrada_valor" type="text"></label>
+      <button type="button" class="pill">Continuar →</button>
+    </div>
+    <form class="etapa" id="form-contato" style="display:none">
+      <h3>Como o nosso time fala com você?</h3>
+      <label>Nome<input id="nome" type="text" required></label>
+      <label>WhatsApp<input id="whatsapp" type="tel" required></label>
+      <button type="submit" id="btn-enviar">Receber minhas opções</button>
+    </form>
+  </section>
+  <script>
+    // etapa 1: clicar na opção avança; etapa 2: opção marca, Continuar avança
+    const show = (n) => { document.querySelectorAll('.etapa').forEach((e, i) => { e.style.display = i === n ? '' : 'none'; }); };
+    document.querySelectorAll('[data-etapa="1"] [data-valor]').forEach((b) => b.addEventListener('click', () => { b.setAttribute('aria-pressed', 'true'); show(1); }));
+    document.querySelectorAll('[data-etapa="2"] [data-valor]').forEach((b) => b.addEventListener('click', () => { document.querySelectorAll('[data-etapa="2"] [data-valor]').forEach((x) => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true'); }));
+    document.querySelector('[data-etapa="2"] .pill').addEventListener('click', () => { if (document.querySelector('[data-etapa="2"] [aria-pressed="true"]')) show(2); });
+    document.getElementById('form-contato').addEventListener('submit', (e) => { e.preventDefault(); window.__submitted = { nome: document.getElementById('nome').value, whatsapp: document.getElementById('whatsapp').value }; });
+  </script>
+</body>
+</html>

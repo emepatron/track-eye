@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Track Eye</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF5C4D"/><stop offset="1" stop-color="#FF8A7A"/></linearGradient></defs>
+        <path d="M4 24c6-9 12.5-13.5 20-13.5S38 15 44 24c-6 9-12.5 13.5-20 13.5S10 33 4 24z" fill="none" stroke="#F5F4F1" stroke-width="2.2"/>
+        <circle cx="24" cy="24" r="7.5" fill="url(#g)"/>
+        <circle cx="24" cy="24" r="3" fill="#070708"/>
+      </svg>
+      <div>
+        <div class="brand-name">TRACK <span>EYE</span></div>
+        <div class="brand-sub" id="version">v0.1.0 · alfa</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="btn-settings" title="Configurações" aria-label="Configurações">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" data-view="scan" role="tab">Varredura</button>
+    <button class="tab" data-view="clients" role="tab">Clientes</button>
+    <button class="tab" data-view="history" role="tab">Histórico</button>
+  </nav>
+
+  <main>
+    <!-- ===== Varredura ===== -->
+    <section class="view is-active" id="view-scan">
+      <div class="card page-card">
+        <div class="page-title" id="page-title">—</div>
+        <div class="page-url mono" id="page-url">Abra uma landing page na aba ativa.</div>
+        <div class="page-client" id="page-client"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-scan">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          Varrer página
+        </button>
+        <button class="btn btn-ghost" id="btn-reload" title="Recarrega a página com o observador ativo e varre de novo">Recarregar e varrer</button>
+      </div>
+
+      <div id="scan-empty" class="empty">
+        <div class="empty-eye"></div>
+        <p>Clique em <strong>Varrer página</strong> para ver tags, WhatsApp, formulários, UTM e saúde da LP em segundos.</p>
+        <p class="muted small">Dica: abra a LP pelo link do anúncio (com UTM) e, se a página já estava aberta antes da extensão, use <strong>Recarregar e varrer</strong>.</p>
+      </div>
+
+      <div id="scan-result" hidden>
+        <div class="verdict" id="verdict">
+          <div class="verdict-label" id="verdict-label">VERDE</div>
+          <div class="verdict-text" id="verdict-text">Pode subir campanha</div>
+          <div class="counts" id="counts"></div>
+        </div>
+
+        <div class="chips" id="filters">
+          <button class="chip is-active" data-filter="all">Tudo</button>
+          <button class="chip" data-filter="issues">Achados</button>
+          <button class="chip" data-filter="pass">Em ordem</button>
+          <button class="chip" data-filter="unknown">Não conferido</button>
+        </div>
+
+        <div class="checks" id="checks"></div>
+
+        <details class="card details-card" id="test-card">
+          <summary>Teste de envio do formulário</summary>
+          <div class="details-body">
+            <p class="small muted">Preenche o formulário com dados marcados como <strong>TESTE TRACK EYE</strong>, envia e observa por 12 segundos: página de obrigado, evento Lead na Meta, conversão no GA4 e no Google Ads.</p>
+            <p class="small warn-text">Isso cria um lead real no CRM do cliente. Avise o comercial para apagar.</p>
+            <label class="field"><span>Formulário</span><select id="test-form"></select></label>
+            <button class="btn btn-danger" id="btn-test">Enviar teste agora</button>
+            <div class="progress" id="test-progress" hidden><div class="bar"></div><span>Observando a página…</span></div>
+          </div>
+        </details>
+
+        <details class="card details-card" id="inventory-card">
+          <summary>Inventário e eventos observados</summary>
+          <div class="details-body" id="inventory"></div>
+        </details>
+
+        <div class="export">
+          <button class="btn btn-ghost" id="btn-copy-md">Copiar laudo</button>
+          <button class="btn btn-ghost" id="btn-copy-short">Copiar resumo</button>
+          <button class="btn btn-ghost" id="btn-download-md">Baixar .md</button>
+          <button class="btn btn-ghost" id="btn-shot">Print da página</button>
+          <button class="btn btn-outline" id="btn-save">Salvar no histórico</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Clientes ===== -->
+    <section class="view" id="view-clients">
+      <div class="row">
+        <input class="input" id="client-search" placeholder="Buscar cliente" type="search">
+        <button class="btn btn-primary" id="btn-new-client">Novo</button>
+      </div>
+      <div class="list" id="client-list"></div>
+      <div class="row export-row">
+        <button class="btn btn-ghost" id="btn-export">Exportar JSON</button>
+        <button class="btn btn-ghost" id="btn-import">Importar JSON</button>
+        <input type="file" id="import-file" accept="application/json" hidden>
+      </div>
+      <p class="small muted">Sem Lab nesta versão: exporte o JSON e compartilhe com o time. Importar mescla pelo nome e nunca apaga.</p>
+
+      <form class="card client-form" id="client-form" hidden>
+        <h3 id="client-form-title">Novo cliente</h3>
+        <input type="hidden" id="cf-id">
+        <label class="field"><span>Nome</span><input class="input" id="cf-name" required placeholder="Ex.: Loja Exemplo"></label>
+        <label class="field"><span>Domínios das LPs (um por linha)</span><textarea class="input" id="cf-domains" rows="3" placeholder="lojaexemplo.com.br&#10;lp.lojaexemplo.com.br"></textarea></label>
+        <label class="field"><span>Números de WhatsApp esperados (um por linha)</span><textarea class="input" id="cf-whatsapp" rows="3" placeholder="35 99999-0000"></textarea></label>
+        <label class="field"><span>Observações</span><textarea class="input" id="cf-notes" rows="2" placeholder="Pixel oficial, GTM oficial, quem aprova…"></textarea></label>
+        <div class="row">
+          <button class="btn btn-primary" type="submit">Salvar</button>
+          <button class="btn btn-ghost" type="button" id="cf-cancel">Cancelar</button>
+          <button class="btn btn-ghost danger-text" type="button" id="cf-delete" hidden>Excluir</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== Histórico ===== -->
+    <section class="view" id="view-history">
+      <div class="list" id="history-list"></div>
+      <div class="card" id="history-detail" hidden>
+        <div class="row space">
+          <strong id="hd-title"></strong>
+          <button class="btn btn-ghost" id="hd-back">Voltar</button>
+        </div>
+        <pre class="mono md" id="hd-md"></pre>
+        <div class="row">
+          <button class="btn btn-ghost" id="hd-copy">Copiar</button>
+          <button class="btn btn-ghost danger-text" id="hd-delete">Excluir</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Configurações ===== -->
+  <dialog id="settings">
+    <form method="dialog" class="dialog-body">
+      <h3>Configurações</h3>
+      <label class="field"><span>Seu nome (vai no laudo)</span><input class="input" id="st-analyst" placeholder="Ex.: Pedro"></label>
+      <label class="field"><span>E-mail de teste</span><input class="input" id="st-email" placeholder="teste+trackeye@suaempresa.com"></label>
+      <label class="field"><span>WhatsApp de teste</span><input class="input" id="st-phone" placeholder="35 99999-0000"></label>
+      <div class="row">
+        <button class="btn btn-primary" value="save">Salvar</button>
+        <button class="btn btn-ghost" value="cancel">Fechar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" hidden></div>
+  <script type="module" src="panel.js"></script>
+</body>
+</html>

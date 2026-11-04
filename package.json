@@ -1,0 +1,17 @@
+{
+  "name": "track-eye",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Extensão de navegador para auditar o rastreamento de landing pages: tags, WhatsApp, formulários, UTM e teste de envio.",
+  "license": "MIT",
+  "author": "Emerson Serra",
+  "repository": { "type": "git", "url": "https://github.com/emepatron/track-eye" },
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/",
+    "icons": "node scripts/make-icons.js"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

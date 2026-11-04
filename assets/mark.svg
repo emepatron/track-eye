@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Track Eye">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF5C4D"/><stop offset="1" stop-color="#FF8A7A"/></linearGradient></defs>
+  <path d="M4 24c6-9 12.5-13.5 20-13.5S38 15 44 24c-6 9-12.5 13.5-20 13.5S10 33 4 24z" fill="none" stroke="#F5F4F1" stroke-width="2.2"/>
+  <circle cx="24" cy="24" r="7.5" fill="url(#g)"/>
+  <circle cx="24" cy="24" r="3" fill="#070708"/>
+</svg>
