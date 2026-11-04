@@ -57,6 +57,19 @@ Sem `chrome.runtime`, o painel carrega o `mock-chrome.js` com uma página fictí
 - Provedor de formulário: cadeia de `provider` em `describe()`.
 - Tags: `PATTERNS` em `net.js` e os regex de `tags` em `scanner.js`.
 
+## Versão e ícone
+
+O navegador guarda o ícone da barra em cache por versão da extensão. Ao mudar ícone ou qualquer comportamento visível, suba `version` em `manifest.json` e `package.json`; sem isso, "Atualizar" na página de extensões não troca o ícone. Os PNG saem de `npm run icons` (`scripts/make-icons.js`); o 16 px é simplificado de propósito (só contorno do olho e pupila), porque o anel da íris vira borrão nesse tamanho.
+
+## Site
+
+`site/index.html` é a landing page, em um arquivo só, com caminhos relativos (`../assets/...`) para abrir tanto do disco quanto servida. `site/Dockerfile` (nginx:alpine) e `site/nginx.conf` (headers de segurança, gzip, cache, redirects `/github` e `/download`) servem para qualquer host que aceite Dockerfile, com o contexto de build na raiz do repositório e o Dockerfile em `site/Dockerfile`.
+
+## Estado (03/11/2026)
+
+- Versão 0.1.1, alfa. Varredura, teste de envio (inclusive em quiz, com avanço automático e modo de espera), clientes, histórico e laudo funcionando em páginas reais.
+- Não iniciado: publicação na Chrome Web Store (a instalação é "sem compactação"), detecção de outros provedores de chat e formulário além dos listados em `scanner.js`.
+
 ## Pull requests
 
 Mantenha `npm test` verde, escreva mensagens de commit em português, e se a mudança for de comportamento, atualize `docs/laudo.md` ou `docs/limites.md`.
