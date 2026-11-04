@@ -1,5 +1,5 @@
 // Gera os ícones PNG do Track Eye sem dependência externa: fundo preto
-// arredondado, olho branco e íris coral (#FF5C4D).
+// arredondado com contorno branco, olho em traços brancos e pupila coral (#FF5C4D).
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
@@ -62,20 +62,24 @@ const sample = (fn) => (x, y, s) => {
 
 const pixel = sample((x, y, s) => {
   const u = x / s, v = y / s;
-  // fundo arredondado
-  const r = 0.22;
+  const W = [245, 244, 241, 255], K = [7, 7, 8, 255], C = [255, 92, 77, 255];
+  // caixa preta arredondada com contorno branco fino (proporções do mark.svg)
+  const r = 0.23;
   const cx = Math.min(Math.max(u, r), 1 - r), cy = Math.min(Math.max(v, r), 1 - r);
-  if (Math.hypot(u - cx, v - cy) > r) return [0, 0, 0, 0];
-  // olho: lente (interseção de dois círculos)
-  const eyeW = 0.36, eyeH = 0.2;
-  const dx = (u - 0.5) / eyeW, dy = (v - 0.5) / eyeH;
-  const inEye = dx * dx + dy * dy <= 1;
-  const iris = Math.hypot(u - 0.5, v - 0.5) <= 0.13;
-  const pupil = Math.hypot(u - 0.5, v - 0.5) <= 0.06;
-  if (pupil) return [10, 10, 10, 255];
-  if (iris) return [255, 92, 77, 255];
-  if (inEye) return [245, 244, 241, 255];
-  return [10, 10, 10, 255];
+  const dBox = Math.hypot(u - cx, v - cy) - r; // negativo = dentro
+  if (dBox > 0) return [0, 0, 0, 0];
+  if (dBox > -Math.max(0.017, 1 / s)) return W;
+  // olho em traço: distância real até a borda da elipse, para espessura uniforme
+  const half = Math.max(0.023, 0.9 / s); // metade da espessura do traço
+  const eyeW = 0.3125, eyeH = 0.233;
+  const dxr = u - 0.5, dyr = v - 0.5;
+  const ang = Math.atan2(dyr, dxr);
+  const R = (eyeW * eyeH) / Math.hypot(eyeH * Math.cos(ang), eyeW * Math.sin(ang));
+  const d = Math.hypot(dxr, dyr);
+  if (Math.abs(d - R) < half) return W;
+  if (Math.abs(d - 0.129) < half) return W;
+  if (d <= 0.046) return C;
+  return K;
 });
 
 for (const size of [16, 48, 128]) {
