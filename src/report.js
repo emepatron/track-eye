@@ -1,4 +1,4 @@
-// Laudo em markdown, para colar no Discord, no grupo do cliente ou guardar.
+// Laudo em markdown, para guardar ou compartilhar.
 import { GROUP_LABELS, formatPhone } from './rules.js';
 
 const ICON = { pass: '✅', warn: '⚠️', fail: '🔴', info: 'ℹ️', unknown: '⬜' };
@@ -14,7 +14,7 @@ export function toMarkdown({ scan, result, client, analyst, version }) {
   const lines = [];
   lines.push(`# Track Eye · Laudo de rastreamento`);
   lines.push('');
-  lines.push(`- **Cliente:** ${client ? client.name : 'não cadastrado'}`);
+  lines.push(`- **Projeto:** ${client ? client.name : 'não cadastrado'}`);
   lines.push(`- **Página:** ${scan.url}`);
   if (scan.title) lines.push(`- **Título:** ${scan.title}`);
   lines.push(`- **Data:** ${fmtDate(result.evaluatedAt)}${analyst ? ` · **Analista:** ${analyst}` : ''}`);
@@ -50,7 +50,7 @@ export function toMarkdown({ scan, result, client, analyst, version }) {
   return lines.join('\n');
 }
 
-// Versão curta para o grupo do cliente ou Discord: veredito e achados.
+// Versão curta para mensagem: veredito e achados.
 export function toShort({ scan, result, client }) {
   const found = result.checks.filter((c) => c.status === 'fail' || c.status === 'warn');
   const lines = [`Track Eye · ${client ? client.name : scan.host} · ${fmtDate(result.evaluatedAt)}`, VERDICT[result.verdict] || result.verdict, scan.url, ''];

@@ -10,13 +10,13 @@
   <header class="topbar">
     <div class="brand">
       <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="1.5" y="1.5" width="45" height="45" rx="11" fill="#070708" stroke="#F5F4F1" stroke-width="1.6"/>
-        <path d="M9 24c5-7.5 10-11.2 15-11.2S34 16.5 39 24c-5 7.5-10 11.2-15 11.2S14 31.5 9 24z" fill="none" stroke="#F5F4F1" stroke-width="2.2" stroke-linejoin="round"/>
-        <circle cx="24" cy="24" r="6.2" fill="none" stroke="#F5F4F1" stroke-width="2.2"/>
-        <circle cx="24" cy="24" r="2.2" fill="#FF5C4D"/>
+        <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#121826" stroke="rgba(237,241,247,0.22)" stroke-width="1.5"/>
+        <path d="M9 24c5-7.5 10-11.2 15-11.2S34 16.5 39 24c-5 7.5-10 11.2-15 11.2S14 31.5 9 24z" fill="none" stroke="#EDF1F7" stroke-width="2.2" stroke-linejoin="round"/>
+        <circle cx="24" cy="24" r="6.2" fill="none" stroke="#5BFFB0" stroke-width="2.2"/>
+        <circle cx="24" cy="24" r="2.4" fill="#5BFFB0"/>
       </svg>
       <div>
-        <div class="brand-name">TRACK <span>EYE</span></div>
+        <div class="brand-name">Track <span>Eye</span></div>
         <div class="brand-sub" id="version">v0.1.0 · alfa</div>
       </div>
     </div>
@@ -27,7 +27,7 @@
 
   <nav class="tabs" role="tablist">
     <button class="tab is-active" data-view="scan" role="tab">Varredura</button>
-    <button class="tab" data-view="clients" role="tab">Clientes</button>
+    <button class="tab" data-view="clients" role="tab">Projetos</button>
     <button class="tab" data-view="history" role="tab">Histórico</button>
   </nav>
 
@@ -47,6 +47,21 @@
         </button>
         <button class="btn btn-ghost" id="btn-reload" title="Recarrega a página com o observador ativo e varre de novo">Recarregar e varrer</button>
       </div>
+
+      <details class="card details-card" id="utm-card">
+        <summary>Abrir com UTM de teste</summary>
+        <div class="details-body">
+          <p class="small muted">Abre a página com parâmetros de origem conhecidos. Assim a varredura e o teste de envio provam se a UTM chega ao WhatsApp, aos campos ocultos e ao CRM.</p>
+          <label class="field"><span>URL da página</span><input class="input" id="utm-url" placeholder="https://lp.exemplo.com.br/" spellcheck="false"></label>
+          <label class="field"><span>Parâmetros (<code>{data}</code> vira a data de hoje)</span><input class="input mono" id="utm-template" placeholder="utm_source=trackeye&amp;utm_medium=teste&amp;utm_campaign=auditoria&amp;utm_content={data}" spellcheck="false"></label>
+          <div class="utm-preview mono" id="utm-preview"></div>
+          <div class="row">
+            <button class="btn btn-primary" id="btn-utm-open" type="button">Abrir aqui e varrer</button>
+            <button class="btn btn-ghost" id="btn-utm-new" type="button">Nova aba</button>
+            <button class="btn btn-ghost" id="btn-utm-copy" type="button">Copiar</button>
+          </div>
+        </div>
+      </details>
 
       <div id="scan-empty" class="empty">
         <div class="empty-eye"></div>
@@ -74,7 +89,7 @@
           <summary>Teste de envio do formulário</summary>
           <div class="details-body">
             <p class="small muted">Preenche o formulário com dados marcados como <strong>TESTE TRACK EYE</strong>, envia e observa por 12 segundos: página de obrigado, evento Lead na Meta, conversão no GA4 e no Google Ads.</p>
-            <p class="small warn-text">Isso cria um lead real no CRM do cliente. Avise o comercial para apagar.</p>
+            <p class="small warn-text">Isso cria um lead de verdade no CRM do projeto. Apague depois.</p>
             <label class="field"><span>Formulário</span><select id="test-form"></select></label>
             <button class="btn btn-danger" id="btn-test">Enviar teste agora</button>
             <div class="progress" id="test-progress" hidden><div class="bar"></div><span>Observando a página…</span></div>
@@ -96,10 +111,10 @@
       </div>
     </section>
 
-    <!-- ===== Clientes ===== -->
+    <!-- ===== Projetos ===== -->
     <section class="view" id="view-clients">
       <div class="row">
-        <input class="input" id="client-search" placeholder="Buscar cliente" type="search">
+        <input class="input" id="client-search" placeholder="Buscar projeto" type="search">
         <button class="btn btn-primary" id="btn-new-client">Novo</button>
       </div>
       <div class="list" id="client-list"></div>
@@ -111,7 +126,7 @@
       <p class="small muted">Sem Lab nesta versão: exporte o JSON e compartilhe com o time. Importar mescla pelo nome e nunca apaga.</p>
 
       <form class="card client-form" id="client-form" hidden>
-        <h3 id="client-form-title">Novo cliente</h3>
+        <h3 id="client-form-title">Novo projeto</h3>
         <input type="hidden" id="cf-id">
         <label class="field"><span>Nome</span><input class="input" id="cf-name" required placeholder="Ex.: Loja Exemplo"></label>
         <label class="field"><span>Domínios das LPs (um por linha)</span><textarea class="input" id="cf-domains" rows="3" placeholder="lojaexemplo.com.br&#10;lp.lojaexemplo.com.br"></textarea></label>
@@ -149,6 +164,7 @@
       <label class="field"><span>Seu nome (vai no laudo)</span><input class="input" id="st-analyst" placeholder="Ex.: Pedro"></label>
       <label class="field"><span>E-mail de teste</span><input class="input" id="st-email" placeholder="teste+trackeye@suaempresa.com"></label>
       <label class="field"><span>WhatsApp de teste</span><input class="input" id="st-phone" placeholder="35 99999-0000"></label>
+      <label class="field"><span>UTM de teste (modelo)</span><input class="input mono" id="st-utm" placeholder="utm_source=trackeye&amp;utm_medium=teste&amp;utm_campaign=auditoria&amp;utm_content={data}" spellcheck="false"></label>
       <div class="row">
         <button class="btn btn-primary" value="save">Salvar</button>
         <button class="btn btn-ghost" value="cancel">Fechar</button>

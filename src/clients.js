@@ -1,4 +1,4 @@
-// Cadastro de clientes e histórico, guardados no chrome.storage.local.
+// Cadastro de projetos ("clients" no código) e histórico, guardados no chrome.storage.local.
 // Sem Lab nesta versão: o time compartilha o cadastro por arquivo JSON.
 
 const KEY_CLIENTS = 'clients';
@@ -37,7 +37,7 @@ export async function listClients() {
 
 export async function saveClient(client) {
   const c = normalizeClient(client);
-  if (!c.name) throw new Error('Nome do cliente é obrigatório.');
+  if (!c.name) throw new Error('Nome do projeto é obrigatório.');
   const list = await get(KEY_CLIENTS, []);
   const i = list.findIndex((x) => x.id === c.id);
   if (i >= 0) list[i] = c; else list.push(c);
@@ -82,7 +82,7 @@ export async function importClients(json) {
 }
 
 export async function getSettings() {
-  return { analyst: '', testPhone: '', testEmail: '', ...(await get(KEY_SETTINGS, {})) };
+  return { analyst: '', testPhone: '', testEmail: '', utmTemplate: '', ...(await get(KEY_SETTINGS, {})) };
 }
 export async function saveSettings(patch) {
   const s = { ...(await getSettings()), ...patch };

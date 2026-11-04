@@ -1,5 +1,5 @@
 // Regras do laudo. Entrada: a varredura (scanner), os eventos de rede
-// observados pelo background, o cliente cadastrado (opcional) e o resultado
+// observados pelo background, o projeto cadastrado (opcional) e o resultado
 // do teste de envio (opcional). Saída: lista de checagens com status, evidência
 // e correção, mais o veredito. Honestidade: só afirma o que tem evidência; o
 // que não deu para conferir fica como "unknown".
@@ -139,7 +139,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
   } else if (metaIds.length === 0) {
     add({ id: 'meta', group: 'tags', status: gtmLoaded ? STATUS.warn : STATUS.fail, title: 'Pixel da Meta não observado',
       evidence: gtmLoaded ? 'Há GTM, mas nenhum fbq init e nenhuma chamada a facebook.com/tr nesta visita.' : 'Nenhum fbq, nenhum ID de pixel, nenhuma chamada a facebook.com/tr.',
-      fix: 'Se o cliente roda Meta Ads, a página precisa do pixel base (PageView em todas as páginas). Instale pelo GTM ou pelo snippet oficial.' });
+      fix: 'Se a página roda Meta Ads, a página precisa do pixel base (PageView em todas as páginas). Instale pelo GTM ou pelo snippet oficial.' });
   } else {
     for (const id of metaIds) {
       const pv = metaFired.filter((e) => e.params.id === id && (e.params.ev || '').toLowerCase() === 'pageview');
@@ -158,7 +158,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
     }
     if (metaIds.length > 1) add({ id: 'meta-multi', group: 'tags', status: STATUS.warn, title: `Mais de um pixel da Meta (${metaIds.join(', ')})`,
       evidence: 'Dois pixels distintos na mesma página: normalmente um de agência anterior ou da BM errada.',
-      fix: 'Confirme com o cliente qual pixel pertence à BM atual e remova o outro.' });
+      fix: 'Confirme qual pixel pertence à BM atual e remova o outro.' });
   }
 
   const adsFired = byKind('ads');
@@ -169,7 +169,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
   } else {
     add({ id: 'ads', group: 'tags', status: STATUS.info, title: 'Sem tag do Google Ads',
       evidence: 'Nenhum ID AW- nem chamada a googleadservices.',
-      fix: 'Sem problema se o cliente não roda Google Ads. Se roda, a conversão precisa estar aqui (ou importada do GA4).' });
+      fix: 'Sem problema se a página não roda Google Ads. Se roda, a conversão precisa estar aqui (ou importada do GA4).' });
   }
 
   const clarityOn = t.clarity.code.length || t.clarity.runtime.length || scan.runtimeFlags.clarity || byKind('clarity').length;
@@ -181,7 +181,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
   const framePixels = uniq(evFrames.filter((e) => e.kind === 'meta').map((e) => e.params.id)).filter((id) => !metaIds.includes(id));
   if (framePixels.length) add({ id: 'meta-iframe', group: 'tags', status: STATUS.info, title: `Pixel da Meta dentro de iframe (${framePixels.join(', ')}), diferente do pixel da página`,
     evidence: 'Dispara de dentro de um formulário ou widget embutido (GoHighLevel, por exemplo). Costuma ser o pixel configurado na conta do widget.',
-    fix: 'Confira se esse pixel pertence à BM do cliente. Se o Lead do formulário dispara só por ele, a campanha precisa otimizar por esse pixel.' });
+    fix: 'Confira se esse pixel pertence à BM certa. Se o Lead do formulário dispara só por ele, a campanha precisa otimizar por esse pixel.' });
   if (t.hotjar.code.length || scan.runtimeFlags.hotjar) add({ id: 'hotjar', group: 'tags', status: STATUS.info, title: `Hotjar presente${t.hotjar.code.length ? ` (${t.hotjar.code.join(', ')})` : ''}` });
   if (t.tiktok.code.length || scan.runtimeFlags.tiktok) add({ id: 'tiktok', group: 'tags', status: STATUS.info, title: `Pixel do TikTok presente${t.tiktok.code.length ? ` (${t.tiktok.code.join(', ')})` : ''}` });
 
@@ -195,7 +195,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
   for (const wdg of widgets) {
     add({ id: `wa-widget-${wdg.label.slice(0, 20)}`, group: 'whatsapp', status: STATUS.unknown, title: `Botão de WhatsApp sem link direto: "${wdg.label}" (${wdg.position})`,
       evidence: `Elemento <${wdg.tag}>${wdg.classes ? ' .' + wdg.classes.split(' ')[0] : ''} abre o WhatsApp ou um chat por JavaScript${wdg.frameHost ? `, dentro do iframe ${wdg.frameHost}` : ''}. O número não aparece no HTML, então não dá para conferir com o cadastro.`,
-      fix: 'Clique no botão e confira na mão se abre o número certo (ou o chat certo). Se for chatbot próprio, confira se a conversa chega no WhatsApp ou no CRM do cliente.' });
+      fix: 'Clique no botão e confira na mão se abre o número certo (ou o chat certo). Se for chatbot próprio, confira se a conversa chega no WhatsApp ou no CRM.' });
   }
   for (const c of chats) add({ id: `chat-${c.slice(0, 20)}`, group: 'whatsapp', status: STATUS.info, title: `Chat na página: ${c}`,
     evidence: 'Widget de atendimento carregado. Lead que entra por aqui não passa pelo formulário nem pelo link de WhatsApp.', fix: 'Confira se o chat está conectado ao número ou ao CRM certo e se marca a origem da conversa.' });
@@ -210,7 +210,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
   } else if (links.length) {
     const noNumber = links.filter((l) => !l.phone);
     if (noNumber.length) add({ id: 'wa-nonumber', group: 'whatsapp', status: STATUS.warn, title: `${noNumber.length} link(s) de WhatsApp sem número`,
-      evidence: `Abre o WhatsApp sem número definido (${uniq(noNumber.map((l) => l.position)).join(', ')}).`, fix: 'Use o formato https://wa.me/55DDDNUMERO?text=... para abrir direto na conversa do cliente.' });
+      evidence: `Abre o WhatsApp sem número definido (${uniq(noNumber.map((l) => l.position)).join(', ')}).`, fix: 'Use o formato https://wa.me/55DDDNUMERO?text=... para abrir direto na conversa certa.' });
     const numbers = uniq(links.map((l) => l.phone));
     for (const n of numbers) {
       const where = uniq(links.filter((l) => l.phone === n).map((l) => l.position)).join(', ');
@@ -218,12 +218,12 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
         const ok = expected.some((e) => samePhone(e, n));
         add(ok
           ? { id: `wa-${n}`, group: 'whatsapp', status: STATUS.pass, title: `WhatsApp ${formatPhone(n)} confere com o cadastro`, evidence: `Encontrado em: ${where}.` }
-          : { id: `wa-${n}`, group: 'whatsapp', status: STATUS.fail, title: `WhatsApp ${formatPhone(n)} não bate com o cadastro do cliente`,
+          : { id: `wa-${n}`, group: 'whatsapp', status: STATUS.fail, title: `WhatsApp ${formatPhone(n)} não bate com o cadastro do projeto`,
             evidence: `Esperado: ${expected.map(formatPhone).join(' ou ')}. Encontrado em: ${where}.`,
             fix: 'Corrija o número no botão antes de subir campanha. Número errado manda lead para o nada.' });
       } else {
         add({ id: `wa-${n}`, group: 'whatsapp', status: STATUS.info, title: `WhatsApp ${formatPhone(n)} encontrado`,
-          evidence: `Em: ${where}. Cadastre o cliente no Track Eye para conferir o número automaticamente.` });
+          evidence: `Em: ${where}. Cadastre o projeto no Track Eye para conferir o número automaticamente.` });
       }
     }
     const noMsg = links.filter((l) => l.phone && !l.hasMessage);
@@ -238,7 +238,7 @@ export function evaluate({ scan, probe = null, deep = null, events = [], navs = 
   if (expected.length && scan.tel && scan.tel.length) {
     const wrong = scan.tel.filter((n) => !expected.some((e) => samePhone(e, n)));
     if (wrong.length) add({ id: 'tel', group: 'whatsapp', status: STATUS.warn, title: `Link tel: com número fora do cadastro (${wrong.map(formatPhone).join(', ')})`,
-      evidence: 'Pode ser telefone fixo legítimo do cliente; confira.', fix: 'Se for número antigo, troque.' });
+      evidence: 'Pode ser telefone fixo legítimo; confira.', fix: 'Se for número antigo, troque.' });
   }
 
   // ---------------- Formulários ----------------

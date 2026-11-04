@@ -3,7 +3,7 @@
   "version": 1,
   "clients": [
     {
-      "name": "Cliente Exemplo",
+      "name": "Projeto Exemplo",
       "domains": ["clienteexemplo.com.br", "lp.clienteexemplo.com.br"],
       "whatsapp": ["35 99999-0000"],
       "notes": "Pixel oficial e GTM oficial: preencher. Quem aprova LP: nome do contato."

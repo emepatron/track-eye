@@ -61,6 +61,8 @@ globalThis.chrome = {
   tabs: {
     query: async () => [tab],
     reload: async () => {},
+    update: async (id, props) => { if (props && props.url) tab.url = props.url; return tab; },
+    create: async (props) => { window.open(props.url, '_blank'); return { id: 2, url: props.url }; },
     onActivated: listeners(),
     onUpdated: listeners(),
   },

@@ -2,6 +2,7 @@
 import { evaluate, GROUP_LABELS, STATUS_LABELS, formatPhone } from '../rules.js';
 import { toMarkdown, toShort, fmtDate } from '../report.js';
 import * as db from '../clients.js';
+import { withTestUtm, DEFAULT_UTM_TEMPLATE } from '../utm.js';
 
 if (!globalThis.chrome || !chrome.runtime || !chrome.runtime.id) {
   // Pré-visualização fora da extensão (navegador comum): carrega um chrome falso.
@@ -14,7 +15,7 @@ $('version').textContent = `v${VERSION} · alfa`;
 
 const state = {
   tab: null,          // aba ativa
-  client: null,       // cliente detectado ou escolhido
+  client: null,       // projeto detectado ou escolhido
   clients: [],
   scan: null,
   events: [],
@@ -78,12 +79,13 @@ async function renderPage() {
   $('page-title').textContent = ok ? (t.title || t.url) : 'Nenhuma página web na aba ativa';
   $('page-url').textContent = ok ? t.url : 'Abra uma landing page e volte aqui.';
   $('btn-scan').disabled = !ok; $('btn-reload').disabled = !ok;
+  if (ok && !state.utmEdited) { $('utm-url').value = t.url; renderUtmPreview(); }
   state.clients = await db.listClients();
   const box = $('page-client');
-  const opts = ['<option value="">Sem cliente</option>', ...state.clients.map((c) => `<option value="${c.id}" ${state.client && state.client.id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`)].join('');
+  const opts = ['<option value="">Sem projeto</option>', ...state.clients.map((c) => `<option value="${c.id}" ${state.client && state.client.id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`)].join('');
   box.innerHTML = (state.client
     ? `<span class="badge brand"><span class="dot"></span>${esc(state.client.name)}</span>`
-    : `<span class="badge">Cliente não identificado</span>`) + `<select class="inline" id="client-pick">${opts}</select>`;
+    : `<span class="badge">Projeto não identificado</span>`) + `<select class="inline" id="client-pick">${opts}</select>`;
   $('client-pick').addEventListener('change', (e) => {
     state.client = state.clients.find((c) => c.id === e.target.value) || null;
     renderPage();
@@ -117,6 +119,36 @@ $('btn-reload').addEventListener('click', async () => {
   await chrome.tabs.reload(state.tab.id);
   toast('Recarregando… varro em 4 s');
   setTimeout(runScan, 4000);
+});
+
+// ---------------- abrir com UTM de teste ----------------
+// A URL vem da aba ativa (ou colada) e os parâmetros do modelo da engrenagem.
+db.getSettings().then((s) => { $('utm-template').value = s.utmTemplate || DEFAULT_UTM_TEMPLATE; renderUtmPreview(); });
+function testUrl() {
+  return withTestUtm($('utm-url').value, $('utm-template').value || DEFAULT_UTM_TEMPLATE);
+}
+function renderUtmPreview() {
+  const el = $('utm-preview');
+  try { el.textContent = testUrl(); el.classList.remove('err'); }
+  catch (e) { el.textContent = e.message; el.classList.add('err'); }
+}
+$('utm-url').addEventListener('input', () => { state.utmEdited = $('utm-url').value.trim() !== (state.tab && state.tab.url); renderUtmPreview(); });
+$('utm-template').addEventListener('input', renderUtmPreview);
+$('btn-utm-open').addEventListener('click', async () => {
+  let url;
+  try { url = testUrl(); } catch (e) { return toast(e.message, true); }
+  if (!state.tab) return toast('Nenhuma aba ativa.', true);
+  await send({ type: 'clear', tabId: state.tab.id });
+  await chrome.tabs.update(state.tab.id, { url });
+  state.utmEdited = false;
+  toast('Abrindo com UTM… varro em 4 s');
+  setTimeout(runScan, 4000);
+});
+$('btn-utm-new').addEventListener('click', async () => {
+  try { await chrome.tabs.create({ url: testUrl() }); } catch (e) { toast(e.message, true); }
+});
+$('btn-utm-copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(testUrl()); toast('URL de teste copiada'); } catch (e) { toast(e.message, true); }
 });
 
 function reevaluate() {
@@ -188,7 +220,7 @@ $('btn-test').addEventListener('click', async () => {
   const formMeta = (state.scan.forms || []).find((f) => (f.key || `0:${f.index}`) === $('test-form').value) || {};
   const path = formMeta.path || '';
   const settings = await db.getSettings();
-  const ok = confirm('Enviar um lead de TESTE pelo formulário desta página? Ele vai entrar no CRM do cliente como "TESTE TRACK EYE".');
+  const ok = confirm('Enviar um lead de TESTE pelo formulário desta página? Ele vai entrar no CRM do projeto como "TESTE TRACK EYE".');
   if (!ok) return;
   const data = {
     name: 'TESTE TRACK EYE',
@@ -272,19 +304,19 @@ $('btn-save').addEventListener('click', async () => {
   toast('Salvo no histórico');
 });
 
-// ---------------- clientes ----------------
+// ---------------- projetos (clientes no código) ----------------
 async function renderClients() {
   state.clients = await db.listClients();
   const q = ($('client-search').value || '').toLowerCase();
   const list = state.clients.filter((c) => !q || c.name.toLowerCase().includes(q) || c.domains.join(' ').includes(q));
-  $('client-list').innerHTML = list.length ? list.map((c) => `<div class="item" data-id="${c.id}"><div><div class="name">${esc(c.name)}</div><div class="sub">${esc(c.domains.join(' · ') || 'sem domínio')} · ${esc(c.whatsapp.map(formatPhone).join(', ') || 'sem WhatsApp')}</div></div><span class="muted">›</span></div>`).join('') : '<p class="muted small">Nenhum cliente ainda. Clique em Novo ou importe o JSON do time.</p>';
+  $('client-list').innerHTML = list.length ? list.map((c) => `<div class="item" data-id="${c.id}"><div><div class="name">${esc(c.name)}</div><div class="sub">${esc(c.domains.join(' · ') || 'sem domínio')} · ${esc(c.whatsapp.map(formatPhone).join(', ') || 'sem WhatsApp')}</div></div><span class="muted">›</span></div>`).join('') : '<p class="muted small">Nenhum projeto ainda. Clique em Novo ou importe um JSON.</p>';
   for (const el of $('client-list').querySelectorAll('.item')) el.addEventListener('click', () => openClientForm(state.clients.find((c) => c.id === el.dataset.id)));
 }
 $('client-search').addEventListener('input', renderClients);
 function openClientForm(c) {
   state.editingClient = c || null;
   $('client-form').hidden = false;
-  $('client-form-title').textContent = c ? `Editar ${c.name}` : 'Novo cliente';
+  $('client-form-title').textContent = c ? `Editar ${c.name}` : 'Novo projeto';
   $('cf-id').value = c ? c.id : '';
   $('cf-name').value = c ? c.name : '';
   $('cf-domains').value = c ? c.domains.join('\n') : (state.tab && /^https?:/.test(state.tab.url) ? db.normalizeDomain(new URL(state.tab.url).hostname) : '');
@@ -310,10 +342,10 @@ $('cf-delete').addEventListener('click', async () => {
   if (!confirm(`Excluir ${c.name} do cadastro? O histórico de laudos fica.`)) return;
   await db.removeClient(c.id);
   $('client-form').hidden = true;
-  toast('Cliente excluído');
+  toast('Projeto excluído');
   await renderClients(); await refreshTab();
 });
-$('btn-export').addEventListener('click', async () => download(`track-eye-clientes-${new Date().toISOString().slice(0, 10)}.json`, new Blob([await db.exportClients()], { type: 'application/json' })));
+$('btn-export').addEventListener('click', async () => download(`track-eye-projetos-${new Date().toISOString().slice(0, 10)}.json`, new Blob([await db.exportClients()], { type: 'application/json' })));
 $('btn-import').addEventListener('click', () => $('import-file').click());
 $('import-file').addEventListener('change', async (e) => {
   const file = e.target.files[0]; if (!file) return;
@@ -349,12 +381,14 @@ $('hd-delete').addEventListener('click', async () => {
 // ---------------- configurações ----------------
 $('btn-settings').addEventListener('click', async () => {
   const s = await db.getSettings();
-  $('st-analyst').value = s.analyst; $('st-email').value = s.testEmail; $('st-phone').value = s.testPhone;
+  $('st-analyst').value = s.analyst; $('st-email').value = s.testEmail; $('st-phone').value = s.testPhone; $('st-utm').value = s.utmTemplate || DEFAULT_UTM_TEMPLATE;
   $('settings').showModal();
 });
 $('settings').addEventListener('close', async () => {
   if ($('settings').returnValue !== 'save') return;
-  await db.saveSettings({ analyst: $('st-analyst').value.trim(), testEmail: $('st-email').value.trim(), testPhone: $('st-phone').value.trim() });
+  const utmTemplate = $('st-utm').value.trim();
+  await db.saveSettings({ analyst: $('st-analyst').value.trim(), testEmail: $('st-email').value.trim(), testPhone: $('st-phone').value.trim(), utmTemplate: utmTemplate === DEFAULT_UTM_TEMPLATE ? '' : utmTemplate });
+  $('utm-template').value = utmTemplate || DEFAULT_UTM_TEMPLATE; renderUtmPreview();
   toast('Configurações salvas');
 });
 
