@@ -3,12 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Track Eye · Raio-X de rastreamento de landing pages</title>
-  <meta name="description" content="Extensão de navegador, grátis e open source, que confere em segundos se a sua landing page está rastreando de verdade: tags, WhatsApp, formulários, UTM e teste de envio, com laudo pronto.">
-  <meta property="og:title" content="Track Eye · Raio-X de rastreamento de landing pages">
-  <meta property="og:description" content="Abra a landing page, clique no olho e saiba se pixel, GA4, WhatsApp, formulário e UTM estão certos. Grátis, open source, sem conta.">
+  <script>document.documentElement.classList.add('js');</script>
+  <title>Track Eye · Seu rastreamento está mentindo? Descubra em 60 s</title>
+  <meta name="theme-color" content="#07090D">
+  <meta name="description" content="Extensão open source para Chrome, Brave e Edge que abre a landing page, observa o que ela faz de verdade e prova com evidência se o pixel dispara, se o lead chega e se a UTM sobrevive até o CRM. Antes do primeiro clique pago.">
+  <meta property="og:title" content="Track Eye · Seu rastreamento está mentindo? Descubra em 60 s">
+  <meta property="og:description" content="Abra a landing page, clique no olho e prove se pixel, GA4, WhatsApp, formulário e UTM estão certos antes de gastar com anúncio. Grátis, open source, sem conta.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://trackeye.gsgrowthai.com/">
+  <meta property="og:image" content="https://trackeye.gsgrowthai.com/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://trackeye.gsgrowthai.com/og.png">
   <link rel="icon" href="../assets/icons/icon-48.png" type="image/png">
   <style>
     @font-face { font-family: 'Space Grotesk'; font-weight: 500; src: url('../assets/fonts/space-grotesk-latin-500-normal.woff2') format('woff2'); font-display: swap; }
@@ -20,186 +27,312 @@
     @font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url('../assets/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2'); font-display: swap; }
 
     :root {
-      --bg: #070708; --bg-2: #0C0C0E; --surface: #121214; --surface-2: #19191C;
-      --line: rgba(255,255,255,0.07); --line-2: rgba(255,255,255,0.13);
-      --text: #F5F4F1; --text-2: #B9B9C0; --text-3: #8A8A92;
-      --brand: #FF5C4D; --brand-2: #FF8A7A; --brand-3: #FFB8AE; --brand-deep: #D93B2C;
-      --pass: #2EE59D; --warn: #FFB020; --info: #5BA8FF; --unknown: #8A8A92;
+      --bg: #07090D; --bg-2: #0B0F16; --bg-3: #10161F;
+      --glass: rgba(255,255,255,0.035); --glass-2: rgba(255,255,255,0.06);
+      --line: rgba(255,255,255,0.08); --line-2: rgba(255,255,255,0.14);
+      --text: #EDF1F7; --text-2: #A7B0BF; --text-3: #8B94A5;
+      --accent: #5BFFB0; --accent-2: #B8FFD9; --accent-dim: rgba(91,255,176,0.14);
+      --pass: #4ADE80; --warn: #FBBF24; --fail: #FB7185; --info: #60A5FA; --unknown: #8B94A5;
       --display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
       --body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
       --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
-      --radius: 18px; --radius-s: 12px; --max: 1120px;
+      --radius: 18px; --radius-s: 12px; --max: 1160px;
+      --ease: cubic-bezier(.2,.7,.2,1);
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    body::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1200px; background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1.2px); background-size: 28px 28px; -webkit-mask-image: linear-gradient(180deg, #000 0, #000 60%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 60%, transparent 100%); pointer-events: none; z-index: 0; }
     a { color: inherit; text-decoration: none; }
-    ::selection { background: rgba(255,92,77,0.35); }
-    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
-    h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
-    h2 { font-size: clamp(28px, 4vw, 40px); }
-    h3 { font-size: 18px; }
+    ::selection { background: rgba(91,255,176,0.3); }
+    a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; margin: 0; }
+    h2 { font-size: clamp(32px, 4.2vw, 50px); }
+    h3 { font-size: 22px; letter-spacing: -0.02em; line-height: 1.2; }
     p { margin: 0; }
     .muted { color: var(--text-3); }
     .mono { font-family: var(--mono); }
-    .grad { background: linear-gradient(90deg, var(--brand), var(--brand-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-2); margin-bottom: 14px; display: inline-flex; align-items: center; gap: 8px; }
-    .eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--brand); }
-    section { padding: 96px 0; position: relative; }
-    .sec-head { max-width: 680px; margin-bottom: 48px; }
-    .sec-head p { color: var(--text-2); font-size: 17px; margin-top: 14px; }
+    .hl { color: var(--accent); }
+    .eyebrow { font-family: var(--body); font-weight: 500; font-size: 13.5px; color: var(--text-3); margin-bottom: 16px; display: block; }
+    section { padding: 110px 0; position: relative; }
+    section.tight { padding-top: 0; }
+    .sec-head { max-width: 760px; margin-bottom: 52px; }
+    .sec-head p { color: var(--text-2); font-size: 18px; margin-top: 18px; max-width: 640px; }
+    .band { background: linear-gradient(180deg, transparent, rgba(91,255,176,0.04), transparent); }
 
     /* ---------- botões ---------- */
-    .btn { display: inline-flex; align-items: center; gap: 9px; padding: 13px 20px; border-radius: 13px; font-weight: 600; font-size: 15px; border: 1px solid transparent; transition: .18s; white-space: nowrap; cursor: pointer; }
-    .btn-primary { color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-deep)); box-shadow: 0 10px 34px rgba(255,92,77,0.3), inset 0 1px 0 rgba(255,255,255,0.18); }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 42px rgba(255,92,77,0.42), inset 0 1px 0 rgba(255,255,255,0.18); }
-    .btn-ghost { background: rgba(255,255,255,0.03); border-color: var(--line-2); color: var(--text); }
-    .btn-ghost:hover { background: var(--surface-2); border-color: rgba(255,255,255,0.22); }
-    .btn svg { width: 18px; height: 18px; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 12px; font-weight: 600; font-size: 15px; border: 1px solid transparent; transition: background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); white-space: nowrap; cursor: pointer; font-family: var(--body); }
+    .btn-primary { color: #06120C; background: var(--accent); box-shadow: 0 8px 24px rgba(91,255,176,0.18), inset 0 1px 0 rgba(255,255,255,0.5); }
+    .btn-primary:hover { background: var(--accent-2); transform: translateY(-2px); }
+    .btn-ghost { background: var(--glass); border-color: var(--line-2); color: var(--text); }
+    .btn-ghost:hover { background: var(--glass-2); border-color: rgba(255,255,255,0.26); }
+    .btn svg, .btn img { width: 17px; height: 17px; flex: none; }
+    .btn img { width: 20px; height: 20px; border-radius: 5px; }
+    .btn .arrow { transition: transform .18s var(--ease); }
+    .btn:hover .arrow { transform: translateX(3px); }
 
     /* ---------- nav ---------- */
-    .nav { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); background: rgba(7,7,8,0.72); border-bottom: 1px solid var(--line); }
-    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; letter-spacing: 0.14em; font-size: 14px; }
-    .brand img { width: 30px; height: 30px; filter: drop-shadow(0 0 12px rgba(255,92,77,0.5)); }
-    .brand span { color: var(--brand-2); }
-    .nav-links { display: flex; gap: 26px; font-size: 14px; color: var(--text-2); }
+    .nav { position: sticky; top: 0; z-index: 30; background: rgba(7,9,13,0.78); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; white-space: nowrap; }
+    .brand img { width: 30px; height: 30px; }
+    .brand em { font-style: normal; color: var(--accent); }
+    .nav-links { display: flex; gap: 28px; font-size: 14px; font-weight: 500; color: var(--text-2); }
     .nav-links a:hover { color: var(--text); }
     .nav-cta { display: flex; gap: 10px; }
-    .nav .btn { padding: 9px 14px; font-size: 13.5px; }
-    @media (max-width: 860px) { .nav-links { display: none; } }
+    .nav .btn { padding: 9px 15px; font-size: 13.5px; }
+    @media (max-width: 960px) { .nav-links { display: none; } }
+    @media (max-width: 520px) { .nav .btn { padding: 9px 12px; } .nav .btn-ghost span { display: none; } .brand { font-size: 17px; } }
 
     /* ---------- hero ---------- */
-    .hero { padding: 92px 0 70px; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; inset: -40% -10% auto; height: 700px; background: radial-gradient(800px 420px at 30% 30%, rgba(255,92,77,0.18), transparent 60%), radial-gradient(600px 400px at 80% 20%, rgba(255,184,174,0.08), transparent 60%); pointer-events: none; }
-    .hero .wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; position: relative; }
-    .hero h1 { font-size: clamp(38px, 5.4vw, 64px); }
-    .hero .lead { font-size: 19px; color: var(--text-2); margin: 22px 0 30px; max-width: 540px; }
-    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
-    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
-    .badge { font-family: var(--mono); font-size: 11.5px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.02); color: var(--text-2); }
-    .badge b { color: var(--pass); font-weight: 600; }
-    @media (max-width: 960px) { .hero .wrap { grid-template-columns: 1fr; } .hero { padding-top: 56px; } }
+    .hero { padding: 88px 0 0; overflow: hidden; text-align: center; }
+    .hero h1 { font-size: clamp(40px, 6.2vw, 78px); max-width: 980px; margin: 0 auto; }
+    .hero .lead { font-size: 19px; color: var(--text-2); margin: 24px auto 30px; max-width: 640px; line-height: 1.6; }
+    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .proof { margin-top: 22px; font-size: 13.5px; color: var(--text-3); }
+    .steps-line { font-family: var(--display); font-weight: 500; font-size: clamp(18px, 2vw, 22px); color: var(--text-2); letter-spacing: -0.01em; margin: 8px 0 0; }
+    .steps-line b { color: var(--text); font-weight: 700; }
 
-    /* ---------- mock do painel ---------- */
-    .panel { width: 100%; max-width: 420px; margin: 0 auto; background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 22px; padding: 16px; box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,92,77,0.08), 0 0 80px rgba(255,92,77,0.08); font-size: 13px; position: relative; }
-    .panel::after { content: ''; position: absolute; inset: auto -30% -40% auto; width: 240px; height: 240px; border-radius: 50%; background: var(--brand); filter: blur(90px); opacity: .28; pointer-events: none; }
+    /* cena 3D */
+    .scene { position: relative; height: 830px; margin-top: 48px; perspective: 1500px; perspective-origin: 50% 20%; }
+    .floor { position: absolute; left: 50%; bottom: 0; width: 1800px; height: 640px; transform: translateX(-50%) rotateX(74deg); transform-origin: 50% 100%; background: linear-gradient(rgba(91,255,176,0.14) 1px, transparent 1px) 0 0/72px 72px, linear-gradient(90deg, rgba(91,255,176,0.14) 1px, transparent 1px) 0 0/72px 72px; -webkit-mask-image: radial-gradient(ellipse 55% 90% at 50% 100%, #000 10%, transparent 75%); mask-image: radial-gradient(ellipse 55% 90% at 50% 100%, #000 10%, transparent 75%); pointer-events: none; }
+    .halo { position: absolute; left: 50%; bottom: 40px; width: 900px; height: 260px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(91,255,176,0.22), transparent 70%); filter: blur(20px); pointer-events: none; }
+    .device { position: absolute; left: 50%; top: 0; width: 420px; margin-left: -210px; transform-style: preserve-3d; transform: rotateX(calc(9deg + var(--ty, 0deg))) rotateY(calc(-12deg + var(--tx, 0deg))); transition: transform .15s var(--ease); text-align: left; }
+    .shell { position: relative; background: linear-gradient(180deg, rgba(20,26,36,0.96), rgba(11,15,22,0.98)); border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; padding: 14px; box-shadow: 0 60px 120px rgba(0,0,0,0.7), 0 0 0 1px rgba(91,255,176,0.08), 0 0 90px rgba(91,255,176,0.12), inset 0 1px 0 rgba(255,255,255,0.1); overflow: hidden; font-size: 12.5px; min-height: 300px; }
+    .shell::after { content: ''; position: absolute; left: 0; right: 0; height: 140px; top: -140px; background: linear-gradient(180deg, transparent, rgba(91,255,176,0.14), transparent); animation: scan 5s linear infinite; pointer-events: none; }
+    @keyframes scan { to { top: 110%; } }
+    .edge { position: absolute; inset: 0; border-radius: 22px; transform: translateZ(-26px); background: #0A0E14; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+    .chip { position: absolute; font-family: var(--mono); font-size: 11.5px; padding: 10px 14px; border-radius: 12px; background: rgba(13,18,26,0.96); border: 1px solid var(--line-2); box-shadow: 0 20px 50px rgba(0,0,0,0.5); color: var(--text-2); white-space: nowrap; display: flex; align-items: center; gap: 10px; transform: translate3d(calc(var(--mx, 0px) * var(--k, 1)), calc(var(--my, 0px) * var(--k, 1)), 0); transition: transform .15s var(--ease), opacity .35s var(--ease); }
+    .js .chip:not(.on) { opacity: 0; }
+    .chip b { color: var(--text); font-weight: 600; }
+    .chip .s { font-weight: 600; } .chip .s.ok { color: var(--pass); } .chip .s.warn { color: var(--warn); } .chip .s.un { color: var(--text-3); font-weight: 500; }
+    /* semáforo: cor + glifo, nunca só cor */
+    .chip i, .p-check i, .ev i { flex: none; font: 600 10px/1 var(--mono); font-style: normal; color: var(--c, var(--pass)); width: 14px; text-align: center; }
+    .chip i::before, .p-check i::before, .ev i::before { content: '✓'; }
+    .chip.warn, .p-check.warn, .ev i.warn { --c: var(--warn); } .chip.warn i::before, .p-check.warn i::before, .ev i.warn::before { content: '!'; }
+    .chip.fail, .p-check.fail, .ev i.fail { --c: var(--fail); } .chip.fail i::before, .p-check.fail i::before, .ev i.fail::before { content: '✕'; }
+    .chip.unknown, .p-check.unknown, .ev i.un { --c: var(--unknown); } .chip.unknown i::before, .p-check.unknown i::before, .ev i.un::before { content: '?'; }
+    .scene.paused .chip, .scene.paused .shell::after, .scene.paused .blink { animation-play-state: paused; }
+    .c1 { left: calc(50% - 560px); top: 90px; --k: -1.4; animation: float 6s ease-in-out infinite; }
+    .c2 { left: calc(50% - 600px); top: 300px; --k: -0.9; animation: float 7s ease-in-out infinite .8s; }
+    .c3 { left: calc(50% - 520px); top: 470px; --k: -1.8; animation: float 6.5s ease-in-out infinite 1.6s; }
+    .c4 { right: calc(50% - 600px); top: 140px; --k: 1.5; animation: float 7.5s ease-in-out infinite .4s; }
+    .c5 { right: calc(50% - 560px); top: 330px; --k: 1.1; animation: float 6.2s ease-in-out infinite 1.2s; }
+    .c6 { right: calc(50% - 520px); top: 500px; --k: 1.9; animation: float 6.8s ease-in-out infinite 2s; }
+    @keyframes float { 50% { translate: 0 -10px; } }
+    @media (max-width: 1240px) { .c1, .c3 { left: 24px; } .c2 { left: 60px; } .c4, .c6 { right: 24px; } .c5 { right: 60px; } }
+    @media (max-width: 1140px) { .c2, .c5 { display: none; } }
+    @media (max-width: 1100px) and (min-width: 961px) { .chip { display: none; } }
+    .scene-ctl { position: absolute; left: 50%; translate: -50% 0; top: -40px; background: transparent; border: 1px solid var(--line-2); color: var(--text-3); font: 500 12px/1 var(--body); padding: 7px 11px; border-radius: 999px; cursor: pointer; }
+    .scene-ctl:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+    @media (max-width: 960px) {
+      .scene { height: auto; perspective: none; padding-bottom: 20px; margin-top: 56px; }
+      .device { position: relative; left: auto; margin: 0 auto; transform: none; width: min(420px, 100%); }
+      .edge, .floor, .halo { display: none; }
+      .chip { position: static; display: inline-flex; margin: 6px 4px 0; animation: none; transform: none; white-space: normal; }
+      .c2, .c3, .c5 { display: none; }
+      .chips-m { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+      .p-group, .p-check small, .p-feed, .p-card .u, .p-counts em, .p-top .ver { font-size: 11px; }
+    }
+
+    /* painel mock (escuro, igual à extensão) */
     .p-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .p-top .brand { font-size: 12px; }
-    .p-tabs { display: grid; grid-template-columns: repeat(3,1fr); background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin-bottom: 12px; font-size: 12px; color: var(--text-3); text-align: center; }
-    .p-tabs span { padding: 6px 0; border-radius: 8px; }
-    .p-tabs .on { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
-    .p-page { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 12px 12px 12px 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
-    .p-page::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--brand), var(--brand-3)); }
-    .p-page b { font-family: var(--display); display: block; font-size: 13.5px; }
-    .p-page .mono { color: var(--text-3); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .p-client { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(255,92,77,0.4); background: rgba(255,92,77,0.1); color: var(--brand-3); }
-    .p-client i { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 8px var(--brand); }
-    .p-verdict { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
-    .p-verdict::after { content: ''; position: absolute; right: -60px; bottom: -80px; width: 180px; height: 180px; border-radius: 50%; background: var(--pass); filter: blur(50px); opacity: .4; }
-    .p-verdict b { font-family: var(--display); font-size: 24px; letter-spacing: .06em; color: var(--pass); display: block; line-height: 1; }
-    .p-verdict span { color: var(--text-2); font-size: 12px; display: block; margin-top: 4px; }
-    .p-counts { display: flex; gap: 6px; margin-top: 10px; }
-    .p-counts em { font-style: normal; font-family: var(--mono); font-size: 10.5px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2); }
-    .p-counts em b { font-size: 10.5px; display: inline; letter-spacing: 0; }
-    .p-counts .w b { color: var(--warn); } .p-counts .p b { color: var(--pass); } .p-counts .u b { color: var(--unknown); }
-    .p-group { font-family: var(--display); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin: 10px 2px 5px; }
-    .p-check { display: grid; grid-template-columns: 8px 1fr; gap: 9px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 8px 11px; margin-bottom: 5px; }
-    .p-check i { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; background: var(--c); box-shadow: 0 0 9px var(--c); }
-    .p-check.pass { --c: var(--pass); } .p-check.warn { --c: var(--warn); } .p-check.fail { --c: var(--brand); } .p-check.unknown { --c: var(--unknown); }
-    .p-check.fail { border-color: rgba(255,92,77,0.35); }
-    .p-check small { display: block; color: var(--text-3); font-family: var(--mono); font-size: 10px; margin-top: 2px; }
-    .p-check .ev { margin-top: 6px; font-family: var(--mono); font-size: 10.5px; color: var(--text-2); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+    .p-top .brand { font-size: 15px; gap: 8px; }
+    .p-top .brand img { width: 26px; height: 26px; }
+    .p-top .ver { font-family: var(--mono); font-size: 10px; color: var(--text-3); }
+    .p-tabs { display: grid; grid-template-columns: repeat(3,1fr); background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 3px; margin-bottom: 12px; font-size: 11.5px; color: var(--text-3); text-align: center; }
+    .p-tabs span { padding: 6px 0; border-radius: 7px; }
+    .p-tabs .on { background: rgba(255,255,255,0.08); color: var(--text); }
+    .p-card { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; margin-bottom: 9px; position: relative; overflow: hidden; }
+    .p-card b.t { font-family: var(--display); font-size: 13.5px; display: block; }
+    .p-card .u { font-family: var(--mono); font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .p-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; padding: 3px 9px; border-radius: 999px; font-size: 10.5px; border: 1px solid rgba(91,255,176,0.35); background: var(--accent-dim); color: var(--accent-2); }
+    .p-badge i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+    .p-actions { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-bottom: 11px; }
+    .p-actions span { font-size: 11.5px; font-weight: 600; padding: 8px 11px; border-radius: 9px; text-align: center; }
+    .p-actions .pri { background: var(--accent); color: #06120C; }
+    .p-actions .gho { border: 1px solid var(--line-2); color: var(--text-2); font-weight: 500; }
+    .p-verdict { display: flex; align-items: baseline; gap: 10px; }
+    .p-verdict b { font-family: var(--display); font-size: 26px; letter-spacing: 0.04em; color: var(--pass); text-shadow: 0 0 24px rgba(74,222,128,0.5); }
+    .p-verdict span { color: var(--text-2); font-size: 12px; }
+    .p-counts { display: flex; gap: 5px; margin-top: 9px; flex-wrap: wrap; }
+    .p-counts em { font-style: normal; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--text-2); }
+    .p-counts .p b { color: var(--pass); } .p-counts .w b { color: var(--warn); } .p-counts .u b { color: var(--unknown); }
+    .p-group { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); margin: 10px 2px 5px; }
+    .p-check { display: grid; grid-template-columns: 7px 1fr; gap: 9px; align-items: start; background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; margin-bottom: 5px; font-size: 11.5px; }
+    .p-check { grid-template-columns: 14px 1fr; }
+    .p-check i { margin-top: 3px; }
+    .p-check.pass { --c: var(--pass); }
+    .p-check small { display: block; color: var(--text-3); font-family: var(--mono); font-size: 9.5px; margin-top: 2px; }
+    .p-feed { margin-top: 10px; border-top: 1px dashed var(--line-2); padding-top: 9px; font-family: var(--mono); font-size: 10px; color: var(--text-3); line-height: 1.8; }
+    .p-feed div { display: grid; grid-template-columns: 36px 1fr auto; gap: 8px; white-space: nowrap; overflow: hidden; }
+    .p-feed .r { overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+    .p-feed .ok { color: var(--pass); }
+    .blink { display: inline-block; width: 7px; height: 12px; background: var(--accent); vertical-align: -2px; margin-left: 4px; animation: blink 1s steps(2) infinite; }
+    @keyframes blink { to { opacity: 0; } }
+    /* varredura animada: o painel cresce conforme os itens entram */
+    .js .shell [data-t]:not(.on) { display: none; }
+    html:not(.js) .v-scan { display: none; }
+    .shell [data-t].on { animation: pop .35s var(--ease); }
+    .shell .v-scan { display: grid; }
+    @keyframes pop { from { opacity: 0; translate: 0 6px; } }
+    .p-card.v { min-height: 78px; display: grid; }
+    .p-card.v > div { grid-area: 1 / 1; }
+    .v-scan { gap: 8px; align-content: center; color: var(--text-2); font-size: 11px; }
+    .p-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; position: relative; }
+    .p-bar i { position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); animation: slide 1.1s infinite; }
+    @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+    .p-actions .pri.pulse { animation: press .5s var(--ease); }
+    @keyframes press { 30% { transform: scale(0.96); box-shadow: 0 0 0 6px rgba(91,255,176,0.25); } }
+    [data-t="6400"].on .p-verdict b { animation: glow 1.2s var(--ease); }
+    @keyframes glow { 30% { text-shadow: 0 0 40px rgba(74,222,128,1), 0 0 80px rgba(74,222,128,0.6); } }
 
-    /* ---------- cards ---------- */
-    .grid { display: grid; gap: 14px; }
-    .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
-    @media (max-width: 900px) { .g3, .g4 { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
-    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; transition: .2s; position: relative; overflow: hidden; }
-    .card:hover { border-color: rgba(255,92,77,0.35); transform: translateY(-2px); }
-    .card h3 { margin-bottom: 8px; }
-    .card p { color: var(--text-2); font-size: 14.5px; }
-    .card .ico { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: rgba(255,92,77,0.1); border: 1px solid rgba(255,92,77,0.3); color: var(--brand-2); margin-bottom: 16px; }
-    .card .ico svg { width: 20px; height: 20px; }
-    .card ul { margin: 12px 0 0; padding: 0; list-style: none; color: var(--text-2); font-size: 13.5px; }
-    .card li { padding-left: 16px; position: relative; margin-bottom: 5px; }
-    .card li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
-    .pain { border-color: rgba(255,92,77,0.18); }
-    .pain .tag { font-family: var(--mono); font-size: 11px; color: var(--brand-2); letter-spacing: .08em; text-transform: uppercase; }
-    .pain h3 { font-size: 17px; margin: 10px 0 8px; }
+    .logos-row { margin-top: 28px; padding: 26px 0 0; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 28px; flex-wrap: wrap; justify-content: center; }
+    .logos-row span { font-size: 13px; color: var(--text-3); }
+    .logos-row .wordmark { font: 600 14px/1 var(--body); color: var(--text-3); letter-spacing: -0.01em; }
+    .logos-row .sep { width: 1px; height: 22px; background: var(--line-2); margin: 0 6px; }
+    .logos-row svg { height: 20px; width: auto; fill: var(--text-3); opacity: .9; transition: fill .2s var(--ease); }
+    .logos-row svg:hover { fill: var(--text); }
 
-    /* ---------- passos ---------- */
-    .steps { counter-reset: s; }
-    .step { display: grid; grid-template-columns: 56px 1fr; gap: 18px; padding: 22px 0; border-top: 1px solid var(--line); }
-    .step:last-child { border-bottom: 1px solid var(--line); }
-    .step::before { counter-increment: s; content: counter(s, decimal-leading-zero); font-family: var(--display); font-weight: 700; font-size: 28px; background: linear-gradient(180deg, var(--brand), var(--brand-3)); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
-    .step h3 { margin-bottom: 6px; }
-    .step p { color: var(--text-2); font-size: 15px; }
+    /* ---------- problema: laudo vermelho ---------- */
+    .split { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 64px; align-items: start; }
+    @media (max-width: 960px) { .split { grid-template-columns: 1fr; gap: 36px; } }
+    .split .sec-head { margin-bottom: 0; }
+    .red { border: 1px solid rgba(251,113,133,0.3); border-radius: 16px; background: #05070A; overflow: hidden; }
+    .red-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--text-3); }
+    .red-head b { color: var(--fail); font-weight: 600; letter-spacing: .06em; }
+    .red-row { display: grid; grid-template-columns: 64px 1fr; gap: 16px; padding: 22px; border-bottom: 1px solid var(--line); }
+    .red-row:last-child { border-bottom: 0; }
+    .red-row .tag { font-family: var(--mono); font-size: 11px; color: var(--fail); font-weight: 600; letter-spacing: .06em; padding-top: 5px; }
+    .red-row h3 { font-size: 20px; margin-bottom: 6px; }
+    .red-row p { color: var(--text-2); font-size: 14.5px; }
+    .red-row .catch { margin-top: 10px; font-size: 13px; color: var(--accent); }
+
+    /* ---------- feature (teste de envio) ---------- */
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    @media (max-width: 900px) { .two { grid-template-columns: 1fr; gap: 36px; } }
+    .finds-l { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 10px; font-size: 15px; color: var(--text-2); }
+    .finds-l li { display: grid; grid-template-columns: 20px 1fr; gap: 10px; }
+    .finds-l svg { width: 18px; height: 18px; color: var(--accent); margin-top: 3px; }
+    .term { background: #05070A; border: 1px solid var(--line-2); border-radius: 16px; font-family: var(--mono); font-size: 12.5px; line-height: 1.85; color: var(--text-2); overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+    .term .t-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--text-3); font-size: 11px; }
+    .term .t-bar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.14); }
+    .term .t-body { padding: 16px 18px; }
+    .term .t-body div { display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; }
+    .term .k { color: var(--text-3); } .term .s { color: var(--pass); } .term .w { color: var(--warn); } .term .ms { color: var(--text-3); font-size: 11px; }
+    .term .sum { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line-2); color: var(--accent); }
+
+    /* ---------- índice do laudo ---------- */
+    .idx { border-top: 1px solid var(--line-2); }
+    .idx-row { display: grid; grid-template-columns: 250px 1fr 330px; gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--line); align-items: start; }
+    .idx-row h3 { font-size: 24px; }
+    .idx-row p { color: var(--text-2); font-size: 15px; }
+    .idx-row p b { color: var(--text); font-weight: 600; }
+    .ev { font-family: var(--mono); font-size: 12px; color: var(--text-2); display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-2); }
+    .ev i { margin-top: 4px; }
+    @media (max-width: 960px) { .idx-row { grid-template-columns: 1fr; gap: 12px; } }
 
     /* ---------- laudo ---------- */
-    .laudo { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: var(--radius); padding: 26px 28px; font-family: var(--mono); font-size: 13px; line-height: 1.7; color: var(--text-2); }
-    .laudo h4 { font-family: var(--display); color: var(--text); font-size: 15px; margin: 0 0 8px; }
+    .ai { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line-2); }
+    .ai p { color: var(--text-2); font-size: 15px; }
+    .ai p b { color: var(--text); font-weight: 600; }
+    .ai-prompt { margin-top: 14px; font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; line-height: 1.6; }
+    .ai-prompt .k { color: var(--accent); margin-right: 8px; }
+    .ai-prompt em { font-style: normal; color: var(--text-3); }
+    .ai-logos { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 16px; color: var(--text-3); }
+    .ai-logos svg { height: 20px; width: auto; fill: var(--text-3); transition: fill .2s var(--ease); }
+    .ai-logos svg:hover { fill: var(--text); }
+    .ai-logos span { font: 600 13.5px/1 var(--body); letter-spacing: -0.01em; }
+    .laudo { background: #05070A; border: 1px solid var(--line-2); border-radius: 16px; padding: 26px 28px; font-family: var(--mono); font-size: 13px; line-height: 1.75; color: var(--text-2); box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+    .laudo h4 { font-family: var(--display); color: var(--text); font-size: 16px; margin: 0 0 8px; }
+    .laudo .v-at { color: var(--warn); font-weight: 600; }
     .laudo .h { color: var(--text); margin-top: 18px; font-weight: 600; }
     .laudo .l { padding-left: 22px; position: relative; }
-    .laudo .l::before { position: absolute; left: 0; }
-    .laudo .ok::before { content: '✅'; } .laudo .at::before { content: '⚠️'; } .laudo .cr::before { content: '🔴'; } .laudo .nd::before { content: '⬜'; }
+    .laudo .l::before { position: absolute; left: 0; color: var(--c); font-weight: 600; }
+    .laudo .ok { --c: var(--pass); } .laudo .ok::before { content: '✓'; }
+    .laudo .at { --c: var(--warn); } .laudo .at::before { content: '!'; }
+    .laudo .nd { --c: var(--unknown); } .laudo .nd::before { content: '?'; }
     .laudo .sub { padding-left: 44px; color: var(--text-3); }
-    .laudo .sub b { color: var(--brand-3); font-weight: 600; }
-    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-    @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+    .laudo .sub b { color: var(--accent); font-weight: 600; }
+    .principles { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    @media (max-width: 760px) { .principles { grid-template-columns: 1fr; gap: 28px; } }
+    .principles h3 { font-size: 26px; margin-bottom: 12px; }
+    .principles p { color: var(--text-2); font-size: 16px; }
 
     /* ---------- quem ---------- */
-    .who { display: grid; grid-template-columns: 220px 1fr; gap: 20px; padding: 20px 0; border-top: 1px solid var(--line); align-items: start; }
+    .who { display: grid; grid-template-columns: 280px 1fr; gap: 20px; padding: 24px 0; border-top: 1px solid var(--line); align-items: start; }
     .who:last-child { border-bottom: 1px solid var(--line); }
-    .who b { font-family: var(--display); font-size: 17px; }
+    .who b { font-family: var(--display); font-size: 19px; letter-spacing: -0.02em; }
     .who p { color: var(--text-2); font-size: 15px; }
     @media (max-width: 700px) { .who { grid-template-columns: 1fr; gap: 6px; } }
-
-    /* ---------- princípios ---------- */
-    .principles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 760px) { .principles { grid-template-columns: 1fr; } }
-    .quote { font-family: var(--display); font-size: clamp(22px, 2.8vw, 30px); line-height: 1.3; color: var(--text); padding: 30px; border-radius: var(--radius); background: linear-gradient(135deg, rgba(255,92,77,0.14), rgba(255,92,77,0.03)); border: 1px solid rgba(255,92,77,0.3); }
-
     /* ---------- instalar ---------- */
-    .install { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-    @media (max-width: 900px) { .install { grid-template-columns: 1fr; padding: 26px; } }
-    .install ol { margin: 18px 0 0; padding-left: 22px; color: var(--text-2); font-size: 15px; }
-    .install li { margin-bottom: 10px; }
-    .install code { font-family: var(--mono); font-size: 13px; background: var(--bg); border: 1px solid var(--line); padding: 2px 7px; border-radius: 6px; color: var(--text); }
-    .note { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: rgba(255,176,32,0.08); border: 1px solid rgba(255,176,32,0.3); color: var(--text-2); font-size: 14px; }
+    .install { border: 1px solid var(--line-2); border-radius: 24px; padding: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; background: var(--glass); }
+    @media (max-width: 900px) { .install { grid-template-columns: 1fr; padding: 28px; } }
+    .install ol { margin: 20px 0 0; padding-left: 22px; color: var(--text-2); font-size: 15px; }
+    .install li { margin-bottom: 12px; }
+    .install code { font-family: var(--mono); font-size: 13px; background: var(--bg); border: 1px solid var(--line-2); padding: 2px 7px; border-radius: 6px; color: var(--text); }
+    .install li .btn { margin-top: 10px; padding: 11px 16px; font-size: 14px; }
+    .copy { font: 500 12px/1 var(--body); color: var(--text-3); background: transparent; border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 8px; margin-left: 6px; cursor: pointer; vertical-align: middle; }
+    .copy:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+    .copy.done { color: var(--accent); border-color: rgba(91,255,176,0.5); }
+    .note { margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); color: var(--text-2); font-size: 14px; }
     .note b { color: var(--warn); }
+    .note .btn { margin-top: 12px; padding: 10px 14px; font-size: 14px; }
+    .dl { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+    .only-mobile { display: none; }
+    @media (max-width: 760px) { .only-mobile { display: block; margin: 0 0 20px; } }
 
     /* ---------- faq ---------- */
-    details { border-top: 1px solid var(--line); padding: 18px 0; }
+    details { border-top: 1px solid var(--line); padding: 20px 0; }
     details:last-of-type { border-bottom: 1px solid var(--line); }
-    summary { cursor: pointer; list-style: none; font-family: var(--display); font-weight: 700; font-size: 17px; display: flex; justify-content: space-between; gap: 20px; }
+    summary { cursor: pointer; list-style: none; font-family: var(--display); font-weight: 700; font-size: 17px; display: flex; justify-content: space-between; gap: 20px; letter-spacing: -0.01em; }
     summary::-webkit-details-marker { display: none; }
-    summary::after { content: '+'; color: var(--brand-2); font-family: var(--mono); font-size: 20px; }
-    details[open] summary::after { content: '−'; }
+    summary::after { content: '+'; color: var(--accent); font-size: 20px; font-weight: 500; }
+    details[open] summary::after { content: '–'; }
     details p { color: var(--text-2); margin-top: 10px; font-size: 15px; max-width: 760px; }
 
-    footer { padding: 50px 0 40px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 14px; }
+    /* ---------- cta final ---------- */
+    .final { text-align: center; padding: 40px 0 120px; }
+    .final h2 { font-size: clamp(34px, 5vw, 64px); max-width: 900px; margin: 0 auto 28px; }
+    .final .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    footer { padding: 40px 0 44px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 14px; position: relative; z-index: 1; }
     footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
     footer a { color: var(--text-2); }
     footer a:hover { color: var(--text); }
-    .reveal { opacity: 0; transform: translateY(14px); transition: .6s ease-out; }
-    .reveal.in { opacity: 1; transform: none; }
+    footer .links { display: flex; gap: 18px; }
+    footer .links a { display: inline-flex; align-items: center; gap: 6px; }
+    footer .links svg { width: 15px; height: 15px; }
+    .js .reveal { opacity: 0; transform: translateY(16px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .js .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .js .reveal { opacity: 1; transform: none; transition: none; }
+      .chip, .shell::after, .blink, .p-bar i, .pulse, .shell [data-t], [data-t="6400"].on .p-verdict b { animation: none !important; }
+      .device, .chip, .btn { transition: none; }
+    }
   </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4L19 6"/></symbol>
+  </svg>
+
   <nav class="nav">
     <div class="wrap">
-      <a class="brand" href="#"><img src="../assets/mark.svg" alt="">TRACK <span>EYE</span></a>
+      <a class="brand" href="#"><img src="../assets/mark.svg" alt="">Track <em>Eye</em></a>
       <div class="nav-links">
-        <a href="#como">Como funciona</a>
+        <a href="#problema">O problema</a>
+        <a href="#teste">Teste de envio</a>
         <a href="#confere">O que confere</a>
-        <a href="#quem">Para quem</a>
-        <a href="#instalar">Instalar</a>
+        <a href="#laudo">O laudo</a>
         <a href="#faq">Dúvidas</a>
       </div>
       <div class="nav-cta">
-        <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>GitHub</a>
+        <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank" aria-label="GitHub"><svg><use href="#i-github"/></svg><span>GitHub</span></a>
         <a class="btn btn-primary" href="#instalar">Instalar grátis</a>
       </div>
     </div>
@@ -207,95 +340,164 @@
 
   <section class="hero">
     <div class="wrap">
-      <div>
-        <div class="eyebrow">Extensão open source para Chrome, Brave e Edge</div>
-        <h1>Sua landing page está <span class="grad">rastreando de verdade?</span></h1>
-        <p class="lead">Abra a página, clique no olho e em segundos você sabe se o pixel dispara, se o WhatsApp aponta para o número certo, se a UTM chega no CRM e se o formulário gera Lead. Com laudo pronto para colar no grupo.</p>
-        <div class="cta">
-          <a class="btn btn-primary" href="#instalar">Instalar em um minuto</a>
-          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank">Ver o código</a>
+      <span class="eyebrow">Extensão open source para Chrome, Brave e Edge</span>
+      <h1>Descubra em 60 segundos se o seu rastreamento está <span class="hl">mentindo para você</span></h1>
+      <p class="lead">O Track Eye abre a landing page, observa o que ela faz de verdade e prova, com evidência, se o pixel dispara, se o lead chega e se a origem sobrevive até o CRM.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#instalar">Instalar grátis <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="#teste">Ver o teste de envio</a>
+      </div>
+      <p class="proof">Código aberto (MIT) · sem conta · sem servidor · roda só no seu navegador</p>
+
+      <div class="scene" id="scene">
+        <button class="scene-ctl" id="scene-ctl" type="button" aria-pressed="false">pausar varredura</button>
+        <div class="floor" aria-hidden="true"></div>
+        <div class="halo" aria-hidden="true"></div>
+        <div class="device" id="device" aria-hidden="true">
+          <div class="edge"></div>
+          <div class="shell" id="shell">
+            <div class="p-top"><span class="brand"><img src="../assets/mark.svg" alt="">Track <em>Eye</em></span><span class="ver">v0.3.0</span></div>
+            <div class="p-tabs"><span class="on">Varredura</span><span>Projetos</span><span>Histórico</span></div>
+            <div class="p-card page"><b class="t">Clínica Exemplo · Agende sua avaliação</b><div class="u">https://lp.clinicaexemplo.com.br/?utm_source=instagram&amp;utm_campaign=novembro</div><span class="p-badge"><i></i>Clínica Exemplo</span></div>
+            <div class="p-actions"><span class="pri" id="p-btn">◉ Varrer página</span><span class="gho">Recarregar e varrer</span></div>
+            <div class="p-card v">
+              <div class="v-scan" data-t="700" data-off="6400"><span class="mono">Varrendo página…</span><div class="p-bar"><i></i></div></div>
+              <div data-t="6400"><div class="p-verdict"><b>VERDE</b><span>Pode subir campanha</span></div><div class="p-counts"><em class="p"><b>7</b> em ordem</em><em class="w"><b>1</b> atenção</em><em class="u"><b>1</b> não conferido</em></div></div>
+            </div>
+            <div class="p-group" data-t="1400">Tags</div>
+            <div class="p-check pass" data-t="1700"><i></i><div>GA4 disparando (G-EXEMPLO001)<small>page_view enviado 1x</small></div></div>
+            <div class="p-check warn" data-t="2900"><i></i><div>Sem Microsoft Clarity<small>atenção · instale pelo GTM</small></div></div>
+            <div class="p-group" data-t="3700">Teste de envio</div>
+            <div class="p-check pass" data-t="4500"><i></i><div>Origem foi junto no envio<small>utm_source, utm_campaign no corpo do POST</small></div></div>
+            <div class="p-check pass" data-t="5500"><i></i><div>Meta recebeu Lead (3333000033330000)<small>2,1 s após o envio</small></div></div>
+            <div class="p-feed">
+              <div data-t="1200"><span>GET</span><span class="r">googletagmanager.com/gtm.js?id=GTM-EXEMPL02</span><span class="ok">200</span></div>
+              <div data-t="2300"><span>POST</span><span class="r">facebook.com/tr?ev=PageView&amp;id=3333000033330000</span><span class="ok">✓</span></div>
+              <div data-t="4000"><span>POST</span><span class="r">/api/lead · utm_source=instagram</span><span class="ok">201</span></div>
+              <div data-t="5100"><span>POST</span><span class="r">facebook.com/tr?ev=Lead&amp;id=3333000033330000</span><span class="ok">✓</span></div>
+              <div><span></span><span class="r">observando a aba<span class="blink"></span></span><span></span></div>
+            </div>
+          </div>
         </div>
-        <div class="badges">
-          <span class="badge"><b>MIT</b> · código aberto</span>
-          <span class="badge">sem conta</span>
-          <span class="badge">sem servidor</span>
-          <span class="badge">roda só no seu navegador</span>
+        <div class="chips-m" aria-hidden="true">
+          <div class="chip c1" data-t="5600"><i></i><b>fbq('track','Lead')</b><span class="s ok">✓ 2,1 s</span></div>
+          <div class="chip c2" data-t="1300"><i></i><b>GTM-EXEMPL02</b> carregado<span class="s ok">200</span></div>
+          <div class="chip c3" data-t="2400"><i></i><b>PageView</b> disparou 1x<span class="s ok">✓</span></div>
+          <div class="chip c4" data-t="4600"><i></i><b>utm_source=instagram</b> → CRM<span class="s ok">✓</span></div>
+          <div class="chip c5" data-t="3300"><i></i>WhatsApp <b>(11) 99999-0000</b><span class="s ok">confere</span></div>
+          <div class="chip c6 unknown" data-t="6100"><i></i><b>CAPI</b> (envio pelo servidor)<span class="s un">não conferido</span></div>
         </div>
       </div>
-      <div class="panel" aria-hidden="true">
-        <div class="p-top">
-          <a class="brand" href="#"><img src="../assets/mark.svg" alt="">TRACK <span>EYE</span></a>
-          <span class="mono muted" style="font-size:10px">v0.1.0</span>
-        </div>
-        <div class="p-tabs"><span class="on">Varredura</span><span>Clientes</span><span>Histórico</span></div>
-        <div class="p-page">
-          <b>Clínica Exemplo · Agende sua avaliação</b>
-          <div class="mono">https://lp.clinicaexemplo.com.br/?utm_source=instagram&amp;utm_campaign=novembro</div>
-          <span class="p-client"><i></i>Clínica Exemplo</span>
-        </div>
-        <div class="p-verdict">
-          <b>VERDE</b><span>Pode subir campanha</span>
-          <div class="p-counts"><em class="p"><b>9</b> em ordem</em><em class="w"><b>1</b> atenção</em><em class="u"><b>2</b> não conferido</em></div>
-        </div>
-        <div class="p-group">Teste de envio</div>
-        <div class="p-check pass"><i></i><div>Meta recebeu Lead (3333000033330000)<small>Em ordem</small></div></div>
-        <div class="p-check pass"><i></i><div>Origem foi junto no envio (utm_source, utm_campaign)<small>Em ordem</small></div></div>
-        <div class="p-group">Tags</div>
-        <div class="p-check pass"><i></i><div>GA4 disparando (G-EXEMPLO001)<small>page_view enviado 1x</small></div></div>
-        <div class="p-check warn"><i></i><div>Sem Microsoft Clarity<small>Atenção</small><div class="ev">Clarity é gratuito e mostra onde o visitante trava. Instale pelo GTM.</div></div></div>
-        <div class="p-group">WhatsApp</div>
-        <div class="p-check pass"><i></i><div>WhatsApp (11) 99999-0000 confere com o cadastro<small>topo, flutuante</small></div></div>
+
+      <p class="steps-line"><b>Abra a página.</b> Clique no olho. Leia o veredito.</p>
+
+      <div class="logos-row">
+        <span>Vê disparar</span>
+        <svg viewBox="0 0 24 24" role="img" aria-label="Google Tag Manager"><title>Google Tag Manager</title><path d="M12.003 0a3 3 0 0 0-2.121 5.121l6.865 6.865-4.446 4.541 1.745 1.836a3.432 3.432 0 0 1 .7.739l.012.011-.001.002a3.432 3.432 0 0 1 .609 1.953 3.432 3.432 0 0 1-.09.78l7.75-7.647c.031-.029.067-.05.098-.08.023-.023.038-.052.06-.076a2.994 2.994 0 0 0-.06-4.166l-9-9A2.99 2.99 0 0 0 12.003 0zM8.63 2.133L.88 9.809a2.998 2.998 0 0 0 0 4.238l7.7 7.75a3.432 3.432 0 0 1-.077-.729 3.432 3.432 0 0 1 3.431-3.431 3.432 3.432 0 0 1 .826.101l-5.523-5.81 4.371-4.373-2.08-2.08c-.903-.904-1.193-2.183-.898-3.342zm3.304 16.004a2.932 2.932 0 0 0-2.931 2.931A2.932 2.932 0 0 0 11.934 24a2.932 2.932 0 0 0 2.932-2.932 2.932 2.932 0 0 0-2.932-2.931z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="Google Analytics 4"><title>Google Analytics 4</title><path d="M22.84 2.9982v17.9987c.0086 1.6473-1.3197 2.9897-2.967 2.9984a2.9808 2.9808 0 01-.3677-.0208c-1.528-.226-2.6477-1.5558-2.6105-3.1V3.1204c-.0369-1.5458 1.0856-2.8762 2.6157-3.1 1.6361-.1915 3.1178.9796 3.3093 2.6158.014.1201.0208.241.0202.3619zM4.1326 18.0548c-1.6417 0-2.9726 1.331-2.9726 2.9726C1.16 22.6691 2.4909 24 4.1326 24s2.9726-1.3309 2.9726-2.9726-1.331-2.9726-2.9726-2.9726zm7.8728-9.0098c-.0171 0-.0342 0-.0513.0003-1.6495.0904-2.9293 1.474-2.891 3.1256v7.9846c0 2.167.9535 3.4825 2.3505 3.763 1.6118.3266 3.1832-.7152 3.5098-2.327.04-.1974.06-.3983.0593-.5998v-8.9585c.003-1.6474-1.33-2.9852-2.9773-2.9882z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="Meta (pixel)"><title>Meta (pixel)</title><path d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="Google Ads"><title>Google Ads</title><path d="M3.9998 22.9291C1.7908 22.9291 0 21.1383 0 18.9293s1.7908-3.9998 3.9998-3.9998 3.9998 1.7908 3.9998 3.9998-1.7908 3.9998-3.9998 3.9998zm19.4643-6.0004L15.4632 3.072C14.3586 1.1587 11.9121.5028 9.9988 1.6074S7.4295 5.1585 8.5341 7.0718l8.0009 13.8567c1.1046 1.9133 3.5511 2.5679 5.4644 1.4646 1.9134-1.1046 2.568-3.5511 1.4647-5.4644zM7.5137 4.8438L1.5645 15.1484A4.5 4.5 0 0 1 4 14.4297c2.5597-.0075 4.6248 2.1585 4.4941 4.7148l3.2168-5.5723-3.6094-6.25c-.4499-.7793-.6322-1.6394-.5878-2.4784z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="Hotjar"><title>Hotjar</title><path d="M10.119 9.814C12.899 8.27 16.704 6.155 16.704 0h-4.609c0 3.444-1.676 4.375-4.214 5.786C5.1 7.33 1.295 9.444 1.295 15.6h4.61c0-3.444 1.676-4.376 4.214-5.786zM18.096 8.4c0 3.444-1.677 4.376-4.215 5.785-2.778 1.544-6.585 3.66-6.585 9.815h4.609c0-3.444 1.676-4.376 4.214-5.786 2.78-1.544 6.586-3.658 6.586-9.814h-4.609z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="TikTok"><title>TikTok</title><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="WhatsApp"><title>WhatsApp</title><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        <i class="sep" aria-hidden="true"></i>
+        <span>e entende formulários de</span>
+        <svg viewBox="0 0 24 24" role="img" aria-label="Elementor"><title>Elementor</title><path d="M12 0C5.372 0 0 5.372 0 12c0 6.626 5.372 12 12 12s12-5.372 12-12c0-6.626-5.372-12-12-12ZM9 17H7V7H9Zm8 0H11V15h6Zm0-4H11V11h6Zm0-4H11V7h6Z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="HubSpot"><title>HubSpot</title><path d="M18.164 7.93V5.084a2.198 2.198 0 001.267-1.978v-.067A2.2 2.2 0 0017.238.845h-.067a2.2 2.2 0 00-2.193 2.193v.067a2.196 2.196 0 001.252 1.973l.013.006v2.852a6.22 6.22 0 00-2.969 1.31l.012-.01-7.828-6.095A2.497 2.497 0 104.3 4.656l-.012.006 7.697 5.991a6.176 6.176 0 00-1.038 3.446c0 1.343.425 2.588 1.147 3.607l-.013-.02-2.342 2.343a1.968 1.968 0 00-.58-.095h-.002a2.033 2.033 0 102.033 2.033 1.978 1.978 0 00-.1-.595l.005.014 2.317-2.317a6.247 6.247 0 104.782-11.134l-.036-.005zm-.964 9.378a3.206 3.206 0 113.215-3.207v.002a3.206 3.206 0 01-3.207 3.207z"/></svg>
+        <svg viewBox="0 0 24 24" role="img" aria-label="WordPress"><title>WordPress</title><path d="M21.469 6.825c.84 1.537 1.318 3.3 1.318 5.175 0 3.979-2.156 7.456-5.363 9.325l3.295-9.527c.615-1.54.82-2.771.82-3.864 0-.405-.026-.78-.07-1.11m-7.981.105c.647-.03 1.232-.105 1.232-.105.582-.075.514-.93-.067-.899 0 0-1.755.135-2.88.135-1.064 0-2.85-.15-2.85-.15-.585-.03-.661.855-.075.885 0 0 .54.061 1.125.09l1.68 4.605-2.37 7.08L5.354 6.9c.649-.03 1.234-.1 1.234-.1.585-.075.516-.93-.065-.896 0 0-1.746.138-2.874.138-.2 0-.438-.008-.69-.015C4.911 3.15 8.235 1.215 12 1.215c2.809 0 5.365 1.072 7.286 2.833-.046-.003-.091-.009-.141-.009-1.06 0-1.812.923-1.812 1.914 0 .89.513 1.643 1.06 2.531.411.72.89 1.643.89 2.977 0 .915-.354 1.994-.821 3.479l-1.075 3.585-3.9-11.61.001.014zM12 22.784c-1.059 0-2.081-.153-3.048-.437l3.237-9.406 3.315 9.087c.024.053.05.101.078.149-1.12.393-2.325.609-3.582.609M1.211 12c0-1.564.336-3.05.935-4.39L7.29 21.709C3.694 19.96 1.212 16.271 1.211 12M12 0C5.385 0 0 5.385 0 12s5.385 12 12 12 12-5.385 12-12S18.615 0 12 0"/></svg>
+        <span class="wordmark">GoHighLevel</span>
       </div>
     </div>
   </section>
 
   <section id="problema">
     <div class="wrap">
-      <div class="sec-head reveal">
-        <div class="eyebrow">A cena que todo mundo conhece</div>
-        <h2>O cliente diz que "o tráfego não converte". Na maioria das vezes, era tracking.</h2>
-        <p>A página vai ao ar, o anúncio roda, a verba sai. Dias depois alguém descobre o que estava quebrado desde o primeiro dia. Conferir na mão leva meia hora, então ninguém confere.</p>
-      </div>
-      <div class="grid g4">
-        <div class="card pain reveal"><span class="tag">Caso 1</span><h3>O pixel estava no código, mas não disparava</h3><p>A Meta otimizou por clique durante semanas. O gerenciador mostrava zero conversões e a culpa caiu no criativo.</p></div>
-        <div class="card pain reveal"><span class="tag">Caso 2</span><h3>Botão de WhatsApp com número antigo</h3><p>Lead clicava, caía em um número que ninguém atendia. A campanha "não trazia lead".</p></div>
-        <div class="card pain reveal"><span class="tag">Caso 3</span><h3>Página de obrigado que parou de contar</h3><p>Uma mudança no builder quebrou o redirect. O Google Ads ficou cego e a campanha perdeu o aprendizado.</p></div>
-        <div class="card pain reveal"><span class="tag">Caso 4</span><h3>UTM que se perdia no caminho</h3><p>O lead chegava no CRM sem origem. Impossível saber qual campanha estava pagando a conta.</p></div>
+      <div class="split">
+        <div class="sec-head reveal">
+          <span class="eyebrow">O que ninguém avisa</span>
+          <h2>Um pixel que não dispara não dá erro. Ele só deixa a verba sumir</h2>
+          <p>O gerenciador mostra zero conversões, o algoritmo otimiza no escuro e a culpa cai no criativo. Semanas depois alguém abre o código e descobre que estava quebrado desde o primeiro dia. Estes três laudos são de páginas que já estavam no ar com anúncio rodando.</p>
+        </div>
+        <div class="red reveal">
+          <div class="red-head"><span>Laudo de rastreamento · 3 páginas, 3 achados</span><b>VERMELHO</b></div>
+          <div class="red-row"><span class="tag">FALHA</span><div><h3>Pixel no código, nenhum evento na rede.</h3><p>A tag estava instalada e não disparava. A Meta otimizou por clique durante três semanas e o relatório culpou o criativo.</p><div class="catch">Aparece na primeira varredura, com o ID do pixel.</div></div></div>
+          <div class="red-row"><span class="tag">FALHA</span><div><h3>Botão de WhatsApp apontando para um número antigo.</h3><p>O lead clicava, abria uma conversa com ninguém e desistia. A campanha "não trazia lead" e ninguém sabia por quê.</p><div class="catch">Cada link é comparado com o número cadastrado.</div></div></div>
+          <div class="red-row"><span class="tag">FALHA</span><div><h3>Formulário enviando sem a origem.</h3><p>O lead chegava no CRM sem campanha, sem fonte, sem mídia. Impossível saber o que pagava a conta e o que queimava dinheiro.</p><div class="catch">A UTM é seguida da URL até o corpo do envio.</div></div></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="como">
+  <section id="teste" class="band">
     <div class="wrap">
       <div class="two">
         <div class="reveal">
-          <div class="eyebrow">Como funciona</div>
-          <h2>Três cliques entre a dúvida e o laudo.</h2>
-          <p class="muted" style="margin-top:14px;font-size:17px">Nada de GTM Preview, gerenciador de anúncios ou código-fonte. O Track Eye observa o que a página faz de verdade no navegador e cruza com o que está no código.</p>
+          <span class="eyebrow">Teste de envio</span>
+          <h2>Não acredite que o lead chega. <span class="hl">Prove</span></h2>
+          <p style="color:var(--text-2);font-size:17px;margin-top:18px">Com um clique, o Track Eye preenche o formulário com dados de teste, percorre o quiz se houver, envia e observa a página por 12 segundos. Tudo o que deveria acontecer depois de um lead de verdade é conferido na hora.</p>
+          <ul class="finds-l">
+            <li><svg><use href="#i-check"/></svg>A requisição saiu e a página de obrigado (ou a mensagem de sucesso) apareceu</li>
+            <li><svg><use href="#i-check"/></svg>A Meta recebeu o evento Lead, o GA4 contou generate_lead e o Google Ads registrou a conversão</li>
+            <li><svg><use href="#i-check"/></svg>A origem (utm_source, utm_campaign) foi junto no corpo do envio ao CRM</li>
+            <li><svg><use href="#i-check"/></svg>O lead chega marcado como "TESTE TRACK EYE", fácil de achar e apagar</li>
+          </ul>
         </div>
-        <div class="steps reveal">
-          <div class="step"><div><h3>Abra a landing page</h3><p>De preferência pelo link final do anúncio, com UTM. Assim ele testa também se a origem chega onde precisa.</p></div></div>
-          <div class="step"><div><h3>Clique no olho e em "Varrer página"</h3><p>Em segundos: tags no código e disparando, links de WhatsApp, formulários, UTM e saúde da página. Cada item com evidência e o que fazer.</p></div></div>
-          <div class="step"><div><h3>Copie o laudo</h3><p>Verde, amarelo ou vermelho. Markdown completo para justificar uma correção, resumo curto para o grupo do cliente, print e histórico.</p></div></div>
+        <div class="term reveal" role="img" aria-label="Linha do tempo de um teste de envio: formulário preenchido, quiz percorrido, lead enviado, Meta, GA4 e Google Ads recebendo em menos de 3 segundos, página de obrigado carregada; Clarity não encontrado.">
+          <div class="t-bar"><i></i><i></i><i></i><span>teste de envio · observando por 12 s</span></div>
+          <div class="t-body">
+            <div><span class="k">→</span><span>preenchendo 4 campos como TESTE TRACK EYE</span><span class="ms">0,0 s</span></div>
+            <div><span class="k">→</span><span>quiz: etapa 1/3 → 2/3 → 3/3 → formulário</span><span class="ms">0,8 s</span></div>
+            <div><span class="k">→</span><span>POST /api/lead · 201 Created</span><span class="ms">1,3 s</span></div>
+            <div><span class="s">✓</span><span>Meta recebeu Lead (3333000033330000)</span><span class="ms">2,1 s</span></div>
+            <div><span class="s">✓</span><span>GA4 contou generate_lead (G-EXEMPLO001)</span><span class="ms">2,3 s</span></div>
+            <div><span class="s">✓</span><span>Google Ads registrou conversão (AW-000000000)</span><span class="ms">2,6 s</span></div>
+            <div><span class="s">✓</span><span>utm_source, utm_campaign no corpo do envio</span><span class="ms"></span></div>
+            <div><span class="s">✓</span><span>/obrigado carregou</span><span class="ms">3,0 s</span></div>
+            <div><span class="w">!</span><span>Clarity não encontrado</span><span class="ms"></span></div>
+            <div class="sum"><span></span><span>VERDE · 6 em ordem · 1 atenção</span><span></span></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="confere">
+  <section id="confere" class="tight">
     <div class="wrap">
       <div class="sec-head reveal">
-        <div class="eyebrow">O que ele confere</div>
-        <h2>Vê o que disparou, não só o que está no código.</h2>
-        <p>Um pixel "instalado" não vale nada se não dispara. O Track Eye observa as requisições de rede da aba e diz o que aconteceu de verdade.</p>
+        <span class="eyebrow">O que ele confere</span>
+        <h2>Seis perguntas que você faria antes de subir campanha. E a linha do laudo que responde cada uma</h2>
       </div>
-      <div class="grid g3">
-        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div><h3>Tags</h3><p>GTM, GA4, pixel da Meta, Google Ads, Clarity, Hotjar, TikTok.</p><ul><li>No código e carregado de verdade</li><li>page_view e PageView disparando</li><li>Pixel duplicado, mais de um container</li><li>Pixel dentro de iframe, separado do da página</li></ul></div>
-        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a8 8 0 0 1-11.8 7L4 19.5l1.1-4A8 8 0 1 1 20 11.5z"/></svg></div><h3>WhatsApp</h3><p>Todo botão e link, inclusive os que abrem por JavaScript.</p><ul><li>Número conferido com o cadastro do cliente</li><li>Mensagem pré-preenchida e origem</li><li>Botão flutuante, shadow DOM, chatbot</li><li>Chats conhecidos (LeadConnector, Typebot, ManyChat e mais)</li></ul></div>
-        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div><h3>Formulários</h3><p>Elementor, Contact Form 7, HubSpot, RD, GoHighLevel, webhook, React, quiz.</p><ul><li>Campos, destino e provedor</li><li>Formulário em iframe e sem &lt;form&gt;</li><li>Oculto atrás de etapas</li><li>Captcha e HTTP sem criptografia</li></ul></div>
-        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M12 4l8 8-8 8"/></svg></div><h3>UTM</h3><p>A origem precisa sobreviver ao caminho inteiro.</p><ul><li>Parâmetros na URL</li><li>Propagação para os links de WhatsApp</li><li>Campos ocultos preenchidos</li><li>Chaves de UTM no corpo do envio ao CRM</li></ul></div>
-        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/></svg></div><h3>Saúde da página</h3><p>O básico que derruba conversão sem ninguém perceber.</p><ul><li>HTTPS</li><li>CSS que não carregou (cache vazio)</li><li>Erros de JavaScript</li><li>Title, viewport, tempo de carregamento</li></ul></div>
-        <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l4 4L19 6"/></svg></div><h3>Teste de envio</h3><p>Envia um lead de teste e observa o que acontece.</p><ul><li>Percorre o quiz sozinho até o formulário</li><li>Requisição saiu, obrigado ou mensagem de sucesso</li><li>Lead na Meta, generate_lead no GA4, conversão no Ads</li><li>Origem no corpo do envio</li></ul></div>
+      <div class="idx reveal">
+        <div class="idx-row">
+          <h3>Está disparando?</h3>
+          <p>Ele observa as requisições da aba, não o HTML. <b>GTM, GA4, pixel da Meta, Google Ads, Clarity, Hotjar e TikTok</b>: no código, carregado e disparando. Pega pixel duplicado, mais de um container e pixel escondido dentro de iframe.</p>
+          <div class="ev"><i class="fail"></i>Pixel da Meta no código, 0 eventos na rede (3333000033330000)</div>
+        </div>
+        <div class="idx-row">
+          <h3>O número confere?</h3>
+          <p>Todo botão e link de WhatsApp é comparado com o número que você cadastrou, inclusive os que abrem por JavaScript, em <b>botão flutuante, chat embutido e chatbot</b> (LeadConnector, Typebot, ManyChat e mais).</p>
+          <div class="ev"><i class="fail"></i>WhatsApp (11) 98888-0000 difere do cadastro · botão flutuante</div>
+        </div>
+        <div class="idx-row">
+          <h3>A origem chega no CRM?</h3>
+          <p>A UTM precisa sobreviver ao caminho todo: <b>URL, link de WhatsApp, campo oculto e corpo do envio</b>. Ele segue cada etapa e diz onde a origem se perdeu. Sem o link do anúncio? Um clique abre a página com <b>UTM de teste</b> e varre.</p>
+          <div class="ev"><i class="pass"></i>utm_source, utm_campaign no corpo do POST /api/lead</div>
+        </div>
+        <div class="idx-row">
+          <h3>O formulário existe para ele?</h3>
+          <p>Formulário em iframe, sem a tag &lt;form&gt;, atrás de um quiz de cinco etapas: a varredura roda em todos os frames. <b>Elementor, Contact Form 7, HubSpot, RD, GoHighLevel, webhook, React.</b> Diz os campos, o destino, o provedor e se há captcha.</p>
+          <div class="ev"><i class="warn"></i>Formulário em iframe · provedor LeadConnector · captcha Turnstile</div>
+        </div>
+        <div class="idx-row">
+          <h3>A página está de pé?</h3>
+          <p>Ninguém reclama de página sem CSS ou com erro de JavaScript. O visitante só vai embora. <b>HTTPS, CSS que não carregou, erros no console, title, viewport e tempo de carregamento.</b></p>
+          <div class="ev"><i class="warn"></i>CSS não carregou com cache vazio · 2 erros de JavaScript</div>
+        </div>
+        <div class="idx-row">
+          <h3>Dá para provar?</h3>
+          <p>Verde, amarelo ou vermelho, cada item com o que foi visto e o que fazer. <b>Markdown completo, print da página e histórico por projeto</b>, exportável em JSON, tudo no seu navegador.</p>
+          <div class="ev"><i class="pass"></i>Laudo salvo · 04/11/2026 14:32 · VERDE · 9 em ordem</div>
+        </div>
       </div>
     </div>
   </section>
@@ -304,22 +506,33 @@
     <div class="wrap">
       <div class="two">
         <div class="reveal">
-          <div class="eyebrow">O laudo</div>
-          <h2>Três blocos, zero achismo.</h2>
-          <p class="muted" style="margin-top:14px;font-size:17px">Achados com evidência e correção. O que passou, como prova de trabalho. E o que não deu para conferir, dito como "não deu para conferir". O Track Eye nunca inventa um erro para parecer útil.</p>
-          <div class="principles" style="margin-top:28px">
-            <div class="card"><h3>Para o gestor de tráfego</h3><p>LP sem laudo verde não entra em campanha. Dois minutos antes de publicar.</p></div>
-            <div class="card"><h3>Para o cliente</h3><p>"LP auditada em tal data, estava verde." Prova de trabalho que cabe numa mensagem.</p></div>
+          <span class="eyebrow">O laudo</span>
+          <h2>Verde, amarelo ou vermelho. <span class="hl">Com prova</span></h2>
+          <p style="color:var(--text-2);font-size:17px;margin-top:18px">Achados com evidência e correção. O que passou, como registro do teste. E o que não deu para conferir, dito como "não deu para conferir". O Track Eye nunca inventa um erro para parecer útil.</p>
+          <div class="ai">
+            <p><b>Cole o laudo na sua IA e peça a correção.</b> Ele sai em Markdown, com a evidência e o que fazer em cada item, no formato que qualquer assistente entende de primeira.</p>
+            <div class="ai-prompt"><span class="k">você →</span>Corrija os achados deste laudo na minha landing page: <em>[cola o laudo]</em></div>
+            <div class="ai-logos">
+              <svg viewBox="0 0 24 24" role="img" aria-label="Claude"><title>Claude</title><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="ChatGPT"><title>ChatGPT</title><path d="M21.55 10.004a5.416 5.416 0 00-.478-4.501c-1.217-2.09-3.662-3.166-6.05-2.66A5.59 5.59 0 0010.831 1C8.39.995 6.224 2.546 5.473 4.838A5.553 5.553 0 001.76 7.496a5.487 5.487 0 00.691 6.5 5.416 5.416 0 00.477 4.502c1.217 2.09 3.662 3.165 6.05 2.66A5.586 5.586 0 0013.168 23c2.443.006 4.61-1.546 5.361-3.84a5.553 5.553 0 003.715-2.66 5.488 5.488 0 00-.693-6.497v.001zm-8.381 11.558a4.199 4.199 0 01-2.675-.954c.034-.018.093-.05.132-.074l4.44-2.53a.71.71 0 00.364-.623v-6.176l1.877 1.069c.02.01.033.029.036.05v5.115c-.003 2.274-1.87 4.118-4.174 4.123zM4.192 17.78a4.059 4.059 0 01-.498-2.763c.032.02.09.055.131.078l4.44 2.53c.225.13.504.13.73 0l5.42-3.088v2.138a.068.068 0 01-.027.057L9.9 19.288c-1.999 1.136-4.552.46-5.707-1.51h-.001zM3.023 8.216A4.15 4.15 0 015.198 6.41l-.002.151v5.06a.711.711 0 00.364.624l5.42 3.087-1.876 1.07a.067.067 0 01-.063.005l-4.489-2.559c-1.995-1.14-2.679-3.658-1.53-5.63h.001zm15.417 3.54l-5.42-3.088L14.896 7.6a.067.067 0 01.063-.006l4.489 2.557c1.998 1.14 2.683 3.662 1.529 5.633a4.163 4.163 0 01-2.174 1.807V12.38a.71.71 0 00-.363-.623zm1.867-2.773a6.04 6.04 0 00-.132-.078l-4.44-2.53a.731.731 0 00-.729 0l-5.42 3.088V7.325a.068.068 0 01.027-.057L14.1 4.713c2-1.137 4.555-.46 5.707 1.513.487.833.664 1.809.499 2.757h.001zm-11.741 3.81l-1.877-1.068a.065.065 0 01-.036-.051V6.559c.001-2.277 1.873-4.122 4.181-4.12.976 0 1.92.338 2.671.954-.034.018-.092.05-.131.073l-4.44 2.53a.71.71 0 00-.365.623l-.003 6.173v.002zm1.02-2.168L12 9.25l2.414 1.375v2.75L12 14.75l-2.415-1.375v-2.75z"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="Google Gemini"><title>Google Gemini</title><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="Cursor"><title>Cursor</title><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="OpenCode"><title>OpenCode</title><path d="M22 24H2V0h20zM17 4.8H7v14.4h10z"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="GitHub Copilot"><title>GitHub Copilot</title><path d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="Windsurf"><title>Windsurf</title><path d="M23.55 5.067c-1.2038-.002-2.1806.973-2.1806 2.1765v4.8676c0 .972-.8035 1.7594-1.7597 1.7594-.568 0-1.1352-.286-1.4718-.7659l-4.9713-7.1003c-.4125-.5896-1.0837-.941-1.8103-.941-1.1334 0-2.1533.9635-2.1533 2.153v4.8957c0 .972-.7969 1.7594-1.7596 1.7594-.57 0-1.1363-.286-1.4728-.7658L.4076 5.1598C.2822 4.9798 0 5.0688 0 5.2882v4.2452c0 .2147.0656.4228.1884.599l5.4748 7.8183c.3234.462.8006.8052 1.3509.9298 1.3771.313 2.6446-.747 2.6446-2.0977v-4.893c0-.972.7875-1.7593 1.7596-1.7593h.003a1.798 1.798 0 0 1 1.4718.7658l4.9723 7.0994c.4135.5905 1.05.941 1.8093.941 1.1587 0 2.1515-.9645 2.1515-2.153v-4.8948c0-.972.7875-1.7594 1.7596-1.7594h.194a.22.22 0 0 0 .2204-.2202v-4.622a.22.22 0 0 0-.2203-.2203Z"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="v0"><title>v0</title><path d="M14.066 6.028v2.22h5.729q.075-.001.148.005l-5.853 5.752a2 2 0 0 1-.024-.309V8.247h-2.353v5.45c0 2.322 1.935 4.222 4.258 4.222h5.675v-2.22h-5.675q-.03 0-.059-.003l5.729-5.629q.006.082.006.166v5.465H24v-5.465a4.204 4.204 0 0 0-4.205-4.205zM0 8.245l8.28 9.266c.839.94 2.396.346 2.396-.914V8.245H8.19v5.44l-4.86-5.44Z"/></svg>
+              <svg viewBox="0 0 24 24" role="img" aria-label="Perplexity"><title>Perplexity</title><path d="M22.3977 7.0896h-2.3106V.0676l-7.5094 6.3542V.1577h-1.1554v6.1966L4.4904 0v7.0896H1.6023v10.3976h2.8882V24l6.932-6.3591v6.2005h1.1554v-6.0469l6.9318 6.1807v-6.4879h2.8882V7.0896zm-3.4657-4.531v4.531h-5.355l5.355-4.531zm-13.2862.0676 4.8691 4.4634H5.6458V2.6262zM2.7576 16.332V8.245h7.8476l-6.1149 6.1147v1.9723H2.7576zm2.8882 5.0404v-3.8852h.0001v-2.6488l5.7763-5.7764v7.0111l-5.7764 5.2993zm12.7086.0248-5.7766-5.1509V9.0618l5.7766 5.7766v6.5588zm2.8882-5.0652h-1.733v-1.9723L13.3948 8.245h7.8478v8.087z"/></svg>
+            </div>
           </div>
         </div>
         <div class="laudo reveal">
           <h4>Track Eye · Laudo de rastreamento</h4>
-          <div>Cliente: Clínica Exemplo · Veredito: 🟡 AMARELO</div>
+          <div>Projeto: Loja Exemplo · Veredito: <span class="v-at">AMARELO</span></div>
           <div class="h">Achados</div>
           <div class="l at">Sem Microsoft Clarity (Tags)</div>
           <div class="sub"><b>O que fazer:</b> Clarity é gratuito e mostra onde o visitante trava. Instale pelo GTM.</div>
           <div class="l at">1 de 2 links de WhatsApp sem mensagem pré-preenchida</div>
-          <div class="sub"><b>O que fazer:</b> adicione ?text= com a origem para o comercial saber de onde o lead veio.</div>
+          <div class="sub"><b>O que fazer:</b> adicione ?text= com a origem para saber de onde o lead veio.</div>
           <div class="h">Em ordem</div>
           <div class="l ok">GTM carregado (GTM-EXEMPL02)</div>
           <div class="l ok">GA4 disparando (G-EXEMPLO001)</div>
@@ -334,86 +547,174 @@
     </div>
   </section>
 
-  <section id="quem">
+  <section id="quem" class="tight">
     <div class="wrap">
       <div class="sec-head reveal">
-        <div class="eyebrow">Para quem</div>
-        <h2>Operação e comercial usam o mesmo olho, para coisas diferentes.</h2>
+        <span class="eyebrow">Para quem</span>
+        <h2>Quem paga o anúncio e quem monta a página usam o mesmo olho</h2>
       </div>
       <div class="reveal">
-        <div class="who"><b>Gestor de tráfego</b><p>Gate antes de subir campanha. Em vez de descobrir o pixel quebrado no relatório da semana 3, descobre no minuto 1. E documenta o teste com o laudo.</p></div>
-        <div class="who"><b>Account e CS</b><p>Quando o cliente diz que "o tráfego não converte", a resposta vem em dois minutos e com evidência. E toda LP entregue sai com laudo verde, que vale como prova de trabalho no check-in.</p></div>
-        <div class="who"><b>Comercial e pré-venda</b><p>Na reunião com o prospect, abre a página dele e mostra ao vivo o que está quebrado. É diagnóstico concreto, não promessa. Vira proposta na hora.</p></div>
+        <div class="who"><b>Quem roda o próprio tráfego</b><p>Você não precisa saber o que é GTM Preview. Abre a página, clica no olho e lê, em português, o que está certo e o que falta.</p></div>
+        <div class="who"><b>Quem contratou alguém para fazer a LP</b><p>Confere o que foi entregue sem depender de ninguém. Se o pixel não dispara, o laudo mostra, com o ID.</p></div>
+        <div class="who"><b>Gestor de tráfego e analista</b><p>Gate antes de subir campanha. Em vez de descobrir o pixel quebrado na terceira semana, descobre no minuto um, e guarda o laudo como registro do teste.</p></div>
         <div class="who"><b>Dev e implementador de LP</b><p>Checklist de entrega: tags, formulário, UTM e teste de envio, sem GTM Preview. Em quiz e formulário dentro de iframe também.</p></div>
-        <div class="who"><b>Dono de negócio</b><p>Confere o que a agência entregou sem depender de ninguém. O laudo é legível por quem não é técnico.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="principios">
+  <section id="principios" class="tight">
     <div class="wrap">
-      <div class="principles">
-        <div class="quote reveal">"Só afirma o que teve evidência. O que não deu para conferir fica dito como não conferido."</div>
-        <div class="reveal">
-          <div class="eyebrow">Princípios</div>
-          <h3 style="font-size:22px;margin-bottom:10px">Só observa</h3>
-          <p class="muted">Não bloqueia requisição, não altera a página, não manda nada para fora do seu navegador. Sem servidor, sem conta, sem telemetria. O cadastro de clientes e o histórico ficam no seu navegador; você exporta um JSON quando quiser compartilhar com o time.</p>
-          <h3 style="font-size:22px;margin:22px 0 10px">Honesto sobre os limites</h3>
-          <p class="muted">Bloqueador de anúncios no seu navegador, iframe que não responde, captcha, eventos enviados pelo servidor (CAPI): o laudo diz quando não enxergou, em vez de culpar a página. A única ação que sai da sua máquina é o teste de envio, feito de propósito e com aviso.</p>
+      <span class="eyebrow reveal">Princípios</span>
+      <div class="principles reveal">
+        <div>
+          <h3>Só observa</h3>
+          <p>Não bloqueia requisição, não altera a página, não manda nada para fora do seu navegador. Não existe servidor, conta nem telemetria. O cadastro de projetos e o histórico ficam no seu navegador; você exporta um JSON quando quiser levar para outra máquina.</p>
+        </div>
+        <div>
+          <h3>Honesto sobre os limites</h3>
+          <p>Bloqueador de anúncios no seu navegador, iframe que não responde, captcha, eventos enviados pelo servidor (CAPI): o laudo diz quando não enxergou, em vez de culpar a página. A única ação que sai da sua máquina é o teste de envio, feito de propósito e com aviso.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="instalar">
+  <section id="instalar" class="tight">
     <div class="wrap">
       <div class="install reveal">
         <div>
-          <div class="eyebrow">Instalar</div>
-          <h2>Um minuto, sem loja, sem cadastro.</h2>
+          <span class="eyebrow">Instalar</span>
+          <h2>Um minuto, sem loja, sem cadastro</h2>
+          <div class="note only-mobile"><b>Está no celular?</b> Extensões só instalam no computador. Mande este link para você e abra no Chrome, no Brave ou no Edge.<br><button class="btn btn-ghost" type="button" id="share">Mandar o link para o computador</button></div>
           <ol>
-            <li>Baixe o código: <a class="grad" href="https://github.com/emepatron/track-eye/archive/refs/heads/main.zip">ZIP do repositório</a> e descompacte.</li>
-            <li>Abra <code>chrome://extensions</code> (no Brave, <code>brave://extensions</code>; no Edge, <code>edge://extensions</code>).</li>
-            <li>Ligue o <strong>Modo do desenvolvedor</strong>, no canto superior direito.</li>
-            <li>Clique em <strong>Carregar sem compactação</strong> e escolha a pasta <code>track-eye</code>.</li>
+            <li>Baixe o Track Eye e descompacte. A pasta vai se chamar <code>track-eye-main</code>.<br><a class="btn btn-primary" href="https://github.com/emepatron/track-eye/archive/refs/heads/main.zip"><img src="../assets/mark.svg" alt="">Baixar o Track Eye (.zip) <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            <li>Abra <code>chrome://extensions</code><button class="copy" type="button" data-copy="chrome://extensions">copiar</button> (no Brave, <code>brave://extensions</code><button class="copy" type="button" data-copy="brave://extensions">copiar</button>; no Edge, <code>edge://extensions</code><button class="copy" type="button" data-copy="edge://extensions">copiar</button>).</li>
+            <li>Ligue o <strong>Modo do desenvolvedor</strong>, no canto superior direito. É só um interruptor; não precisa ser dev.</li>
+            <li>Clique em <strong>Carregar sem compactação</strong> e escolha a pasta <code>track-eye-main</code>.</li>
             <li>Fixe o ícone do olho na barra. Abra uma landing page e clique nele.</li>
           </ol>
           <div class="note"><b>Usa Brave ou bloqueador de anúncios?</b> Desligue para o site que vai auditar. Senão o navegador barra o GTM e o laudo avisa "navegador bloqueando rastreadores" em vez de auditar.</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
-          <a class="btn btn-primary" href="https://github.com/emepatron/track-eye/archive/refs/heads/main.zip">Baixar o Track Eye (.zip)</a>
-          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank">Ver no GitHub</a>
-          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye/blob/main/docs/guia.md" rel="noopener noreferrer" target="_blank">Ler o guia de uso</a>
-          <p class="muted" style="font-size:13.5px;margin-top:8px">Chrome, Brave, Edge e qualquer Chromium 116 ou mais novo. Firefox e Safari ainda não.</p>
+        <div class="dl">
+          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank"><svg><use href="#i-github"/></svg>Ler o código no GitHub</a>
+          <a class="btn btn-ghost" href="https://github.com/emepatron/track-eye/blob/main/docs/guia.md" rel="noopener noreferrer" target="_blank"><svg><use href="#i-book"/></svg>Guia de uso</a>
+          <p class="muted" style="font-size:13.5px;margin-top:8px">Chrome, Brave, Edge e qualquer Chromium 116 ou mais novo. Firefox e Safari ainda não. Licença MIT, código aberto.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="faq">
+  <section id="faq" class="tight">
     <div class="wrap">
-      <div class="sec-head reveal"><div class="eyebrow">Dúvidas</div><h2>Perguntas que aparecem no primeiro dia.</h2></div>
+      <div class="sec-head reveal"><span class="eyebrow">Dúvidas</span><h2>Perguntas que aparecem no primeiro dia</h2></div>
       <div class="reveal">
+        <details><summary>É seguro? Por que não está na Chrome Web Store?</summary><p>O código é aberto, com licença MIT, e cabe em poucos arquivos que qualquer pessoa pode ler no GitHub. A extensão não tem servidor, não cria conta e não manda nada para fora do seu navegador, fora o teste de envio que você dispara de propósito. A publicação na loja ainda não começou: por enquanto a instalação é pelo modo do desenvolvedor, como em qualquer extensão em alfa.</p></details>
         <details><summary>Funciona em quiz e em formulário dentro de iframe?</summary><p>Sim. O teste de envio percorre o quiz sozinho (primeira opção de cada etapa, "Continuar" quando existe) até o formulário aparecer; se não conseguir, espera você chegar lá e envia na hora. A varredura roda em todos os frames da aba, então formulários embutidos de CRM entram no laudo com campos, captcha e provedor.</p></details>
-        <details><summary>O teste de envio cria um lead de verdade?</summary><p>Cria, de propósito. O lead chega como "TESTE TRACK EYE", com e-mail e telefone de teste que você configura. É a única forma de provar que o Lead dispara na Meta, que o GA4 conta e que a UTM chega no CRM. Avise quem atende para apagar.</p></details>
-        <details><summary>Preciso de conta, chave ou servidor?</summary><p>Não. Tudo roda no seu navegador. Não existe backend, login nem telemetria. O cadastro de clientes é um JSON que você exporta e compartilha com o time.</p></details>
+        <details><summary>O teste de envio cria um lead de verdade?</summary><p>Cria, de propósito. O lead chega como "TESTE TRACK EYE", com e-mail e telefone de teste que você configura. É a única forma de provar que o Lead dispara na Meta, que o GA4 conta e que a UTM chega no CRM. Depois, apague no CRM.</p></details>
+        <details><summary>Preciso de conta, chave ou servidor?</summary><p>Não. Tudo roda no seu navegador. Não existe backend, login nem telemetria. O cadastro de projetos é um JSON que você exporta e importa onde quiser.</p></details>
         <details><summary>Ele vê a configuração do GTM?</summary><p>Ele vê o resultado do GTM (o que disparou nesta visita), não a configuração (tags, gatilhos, Conversion Linker). Para auditar o container por dentro, continue usando o GTM Preview. Eventos enviados pelo servidor (CAPI) também ficam fora.</p></details>
         <details><summary>Por que o laudo deu vermelho numa página que eu sei que está certa?</summary><p>Quase sempre é bloqueador de anúncios ou Brave Shields no seu navegador barrando o GTM. O Track Eye detecta isso e avisa; desligue o bloqueio para o site, recarregue e varra de novo. Se não for isso, abra uma issue no GitHub com o laudo e a URL.</p></details>
-        <details><summary>Posso usar com meus clientes e cobrar por isso?</summary><p>Pode. A licença é MIT: use, modifique, distribua, inclusive comercialmente. Se melhorar algo, manda um pull request.</p></details>
+        <details><summary>Posso usar no meu trabalho e cobrar por isso?</summary><p>Pode. A licença é MIT: use, modifique, distribua, inclusive comercialmente. Se melhorar algo, manda um pull request.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final tight">
+    <div class="wrap reveal">
+      <h2>Feito para quem já perdeu verba por causa de uma tag que não disparava</h2>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/emepatron/track-eye/archive/refs/heads/main.zip"><img src="../assets/mark.svg" alt="">Baixar o Track Eye (.zip)</a>
+        <a class="btn btn-ghost" href="#instalar">Como instalar</a>
       </div>
     </div>
   </section>
 
   <footer>
     <div class="wrap">
-      <div><a class="brand" href="#"><img src="../assets/mark.svg" alt="">TRACK <span>EYE</span></a><p style="margin-top:8px">Feito por <a href="https://github.com/emepatron" rel="noopener noreferrer" target="_blank">Emerson Serra</a> para quem já perdeu verba por causa de uma tag que não disparava.</p></div>
-      <div style="display:flex;gap:18px"><a href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank">GitHub</a><a href="https://github.com/emepatron/track-eye/blob/main/docs/guia.md" rel="noopener noreferrer" target="_blank">Guia</a><a href="https://github.com/emepatron/track-eye/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">Licença MIT</a></div>
+      <div><a class="brand" href="#"><img src="../assets/mark.svg" alt="">Track <em>Eye</em></a><p style="margin-top:8px">Feito por <a href="https://github.com/emepatron" rel="noopener noreferrer" target="_blank">Emerson Serra</a>. Código aberto, licença MIT.</p></div>
+      <div class="links"><a href="https://github.com/emepatron/track-eye" rel="noopener noreferrer" target="_blank"><svg><use href="#i-github"/></svg>GitHub</a><a href="https://github.com/emepatron/track-eye/blob/main/docs/guia.md" rel="noopener noreferrer" target="_blank"><svg><use href="#i-book"/></svg>Guia</a><a href="https://github.com/emepatron/track-eye/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">Licença MIT</a></div>
     </div>
   </footer>
 
   <script>
     const io = new IntersectionObserver((entries) => { for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }, { threshold: 0.12 });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // Varredura animada em loop: cada elemento com data-t entra no tempo marcado (ms) e
+    // data-off o esconde. Pausa com o botão, quando a cena sai da tela ou com reduced-motion.
+    const scene = document.getElementById('scene');
+    const ctl = document.getElementById('scene-ctl');
+    // No celular a cena é estática: o painel crescendo a cada ciclo empurraria o texto abaixo.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.matchMedia('(max-width: 960px)').matches;
+    const timed = [...scene.querySelectorAll('[data-t]')];
+    const btn = document.getElementById('p-btn');
+    const LOOP = 10500;
+    let timers = [];
+    let paused = false;
+    let visible = true;
+    let interval = 0;
+    function showFinal() {
+      timers.forEach(clearTimeout); timers = [];
+      timed.forEach((el) => el.classList.toggle('on', !el.dataset.off));
+    }
+    function runScan() {
+      timers.forEach(clearTimeout); timers = [];
+      timed.forEach((el) => el.classList.remove('on'));
+      timers.push(setTimeout(() => { btn.classList.add('pulse'); timers.push(setTimeout(() => btn.classList.remove('pulse'), 600)); }, 300));
+      for (const el of timed) {
+        timers.push(setTimeout(() => el.classList.add('on'), Number(el.dataset.t)));
+        if (el.dataset.off) timers.push(setTimeout(() => el.classList.remove('on'), Number(el.dataset.off)));
+      }
+    }
+    function start() { if (interval || paused || !visible) return; scene.classList.remove('paused'); runScan(); interval = setInterval(runScan, LOOP); }
+    function stop() { clearInterval(interval); interval = 0; timers.forEach(clearTimeout); timers = []; scene.classList.add('paused'); }
+    if (reduced) {
+      showFinal();
+      ctl.hidden = true;
+    } else {
+      ctl.addEventListener('click', () => {
+        paused = !paused;
+        ctl.setAttribute('aria-pressed', String(paused));
+        ctl.textContent = paused ? 'retomar varredura' : 'pausar varredura';
+        if (paused) { stop(); showFinal(); } else start();
+      });
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); else stop(); }, { threshold: 0.2 }).observe(scene);
+      document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
+      start();
+    }
+
+    // Parallax leve da cena 3D: o painel e os chips reagem ao mouse (só no desktop).
+    const fine = window.matchMedia('(pointer: fine) and (min-width: 961px)');
+    if (fine.matches && !reduced) {
+      let raf = 0;
+      scene.addEventListener('mousemove', (e) => {
+        const r = scene.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          scene.style.setProperty('--tx', `${(x * 10).toFixed(2)}deg`);
+          scene.style.setProperty('--ty', `${(-y * 6).toFixed(2)}deg`);
+          scene.style.setProperty('--mx', `${(x * 14).toFixed(1)}px`);
+          scene.style.setProperty('--my', `${(y * 10).toFixed(1)}px`);
+        });
+      });
+      scene.addEventListener('mouseleave', () => { for (const v of ['--tx', '--ty', '--mx', '--my']) scene.style.setProperty(v, '0'); });
+    }
+
+    // Botões "copiar" dos endereços de extensões e "mandar o link" no celular.
+    for (const b of document.querySelectorAll('.copy')) {
+      b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'copiado'; b.classList.add('done'); }
+        catch { b.textContent = 'selecione e copie'; }
+        setTimeout(() => { b.textContent = 'copiar'; b.classList.remove('done'); }, 2000);
+      });
+    }
+    const share = document.getElementById('share');
+    if (share) share.addEventListener('click', async () => {
+      const data = { title: document.title, url: location.href.split('#')[0] };
+      if (navigator.share) { try { await navigator.share(data); } catch {} }
+      else location.href = `mailto:?subject=${encodeURIComponent('Track Eye')}&body=${encodeURIComponent(data.url)}`;
+    });
   </script>
 </body>
 </html>

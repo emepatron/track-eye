@@ -1,5 +1,6 @@
-// Gera os ícones PNG do Track Eye sem dependência externa: fundo preto
-// arredondado com contorno branco, olho em traços brancos e pupila coral (#FF5C4D).
+// Gera os ícones PNG do Track Eye sem dependência externa: fundo escuro (#121826)
+// arredondado com contorno claro, olho em traços claros (#EDF1F7) e íris/pupila
+// verde-sinal (#5BFFB0), igual ao mark.svg.
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
@@ -62,13 +63,13 @@ const sample = (fn) => (x, y, s) => {
 
 const pixel = sample((x, y, s) => {
   const u = x / s, v = y / s;
-  const W = [245, 244, 241, 255], K = [7, 7, 8, 255], C = [255, 92, 77, 255];
-  // caixa preta arredondada com contorno branco fino (proporções do mark.svg)
+  const W = [237, 241, 247, 255], K = [18, 24, 38, 255], C = [91, 255, 176, 255];
+  // caixa escura arredondada com contorno claro fino (proporções do mark.svg)
   const r = 0.23;
   const cx = Math.min(Math.max(u, r), 1 - r), cy = Math.min(Math.max(v, r), 1 - r);
   const dBox = Math.hypot(u - cx, v - cy) - r; // negativo = dentro
   if (dBox > 0) return [0, 0, 0, 0];
-  if (dBox > -Math.max(0.017, 1 / s)) return W;
+  if (dBox > -Math.max(0.017, 1 / s)) return [92, 100, 118, 255];
   // olho em traço: distância real até a borda da elipse, para espessura uniforme
   const half = Math.max(0.023, 0.9 / s); // metade da espessura do traço
   const eyeW = 0.3125, eyeH = 0.233;
@@ -78,7 +79,7 @@ const pixel = sample((x, y, s) => {
   const d = Math.hypot(dxr, dyr);
   if (Math.abs(d - R) < half) return W;
   // em 16 px o anel da íris vira borrão: fica só o contorno e a pupila
-  if (s > 24 && Math.abs(d - 0.129) < half) return W;
+  if (s > 24 && Math.abs(d - 0.129) < half) return C;
   if (d <= (s > 24 ? 0.046 : 0.11)) return C;
   return K;
 });

@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="0.78" cy="0.45" r="0.5"><stop offset="0" stop-color="#5BFFB0" stop-opacity="0.22"/><stop offset="1" stop-color="#5BFFB0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glow2" cx="0.2" cy="0.1" r="0.5"><stop offset="0" stop-color="#5BFFB0" stop-opacity="0.10"/><stop offset="1" stop-color="#5BFFB0" stop-opacity="0"/></radialGradient>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#ffffff" fill-opacity="0.07"/></pattern>
+    <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#161C27"/><stop offset="1" stop-color="#0C1119"/></linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#121826"/><stop offset="1" stop-color="#07090D"/></linearGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="28"/></filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="textglow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#07090D"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- marca -->
+  <g transform="translate(72 64)">
+    <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#mark)" stroke="#EDF1F7" stroke-opacity="0.22" stroke-width="1.5"/>
+    <path d="M9 24c5-7.5 10-11.2 15-11.2S34 16.5 39 24c-5 7.5-10 11.2-15 11.2S14 31.5 9 24z" fill="none" stroke="#EDF1F7" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="24" cy="24" r="6.2" fill="none" stroke="#5BFFB0" stroke-width="2.2"/>
+    <circle cx="24" cy="24" r="2.4" fill="#5BFFB0"/>
+    <text x="62" y="33" font-family="Space Grotesk Light" font-weight="700" font-size="26" fill="#EDF1F7" letter-spacing="-0.5">Track <tspan fill="#5BFFB0">Eye</tspan></text>
+  </g>
+
+  <text x="72" y="176" font-family="JetBrains Mono" font-size="14" fill="#5BFFB0" letter-spacing="1.2"><tspan fill="#8B94A5">//</tspan> EXTENSÃO OPEN SOURCE · CHROME, BRAVE E EDGE</text>
+
+  <g font-family="Space Grotesk Light" font-weight="700" font-size="58" fill="#EDF1F7" letter-spacing="-2">
+    <text x="70" y="250">Descubra em</text>
+    <text x="70" y="316">60 segundos se o</text>
+    <text x="70" y="382">seu rastreamento</text>
+    <text x="70" y="448" fill="#5BFFB0" filter="url(#textglow)">está mentindo.</text>
+  </g>
+
+  <text x="72" y="508" font-family="Inter" font-weight="400" font-size="19" fill="#A7B0BF">Pixel, WhatsApp, formulário e UTM conferidos com evidência,</text>
+  <text x="72" y="536" font-family="Inter" font-weight="400" font-size="19" fill="#A7B0BF">antes do primeiro clique pago. Grátis, sem conta.</text>
+  <text x="72" y="584" font-family="JetBrains Mono" font-size="14" fill="#8B94A5" letter-spacing="1">trackeye.gsgrowthai.com</text>
+
+  <!-- halo do painel -->
+  <ellipse cx="930" cy="560" rx="300" ry="70" fill="#5BFFB0" fill-opacity="0.35" filter="url(#blur)"/>
+
+  <!-- painel -->
+  <g transform="translate(730 60) skewY(-3)">
+    <rect x="-8" y="10" width="400" height="560" rx="24" fill="#05070A" opacity="0.8" filter="url(#soft)"/>
+    <rect x="0" y="0" width="390" height="556" rx="22" fill="url(#shell)" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.2"/>
+    <rect x="0.6" y="0.6" width="388.8" height="554.8" rx="21.5" fill="none" stroke="#5BFFB0" stroke-opacity="0.12"/>
+
+    <!-- topo -->
+    <g transform="translate(16 16)">
+      <rect x="0.75" y="0.75" width="22.5" height="22.5" rx="6" fill="url(#mark)" stroke="#EDF1F7" stroke-opacity="0.22"/>
+      <path d="M4.5 12c2.5-3.75 5-5.6 7.5-5.6s5 1.85 7.5 5.6c-2.5 3.75-5 5.6-7.5 5.6S7 15.75 4.5 12z" fill="none" stroke="#EDF1F7" stroke-width="1.2" stroke-linejoin="round"/>
+      <circle cx="12" cy="12" r="3.1" fill="none" stroke="#5BFFB0" stroke-width="1.2"/>
+      <circle cx="12" cy="12" r="1.2" fill="#5BFFB0"/>
+      <text x="32" y="17" font-family="Space Grotesk Light" font-weight="700" font-size="14" fill="#EDF1F7">Track <tspan fill="#5BFFB0">Eye</tspan></text>
+      <text x="356" y="16" text-anchor="end" font-family="JetBrains Mono" font-size="9.5" fill="#8B94A5">v0.2.0</text>
+    </g>
+    <!-- abas -->
+    <rect x="16" y="52" width="358" height="30" rx="9" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08"/>
+    <rect x="19" y="55" width="116" height="24" rx="7" fill="#ffffff" fill-opacity="0.08"/>
+    <g font-family="Inter" font-weight="500" font-size="11" fill="#8B94A5" text-anchor="middle"><text x="77" y="71" fill="#EDF1F7">Varredura</text><text x="195" y="71">Clientes</text><text x="314" y="71">Histórico</text></g>
+    <!-- página -->
+    <rect x="16" y="94" width="358" height="66" rx="11" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08"/>
+    <rect x="16" y="94" width="3" height="66" rx="1.5" fill="#5BFFB0"/>
+    <text x="30" y="114" font-family="Space Grotesk Light" font-weight="700" font-size="12.5" fill="#EDF1F7">Clínica Exemplo · Agende sua avaliação</text>
+    <text x="30" y="129" font-family="JetBrains Mono" font-size="9" fill="#8B94A5">https://lp.clinicaexemplo.com.br/?utm_source=instagram&amp;utm_campaign=…</text>
+    <rect x="30" y="137" width="94" height="16" rx="8" fill="#5BFFB0" fill-opacity="0.14" stroke="#5BFFB0" stroke-opacity="0.35"/>
+    <circle cx="40" cy="145" r="2.5" fill="#5BFFB0"/>
+    <text x="47" y="148.5" font-family="Inter" font-size="9.5" fill="#B8FFD9">Clínica Exemplo</text>
+    <!-- botões -->
+    <rect x="16" y="172" width="226" height="32" rx="9" fill="#5BFFB0"/>
+    <text x="129" y="192" text-anchor="middle" font-family="Inter" font-weight="600" font-size="11.5" fill="#06120C">◉  Varrer página</text>
+    <rect x="250" y="172" width="124" height="32" rx="9" fill="none" stroke="#ffffff" stroke-opacity="0.14"/>
+    <text x="312" y="192" text-anchor="middle" font-family="Inter" font-weight="500" font-size="11" fill="#A7B0BF">Recarregar e varrer</text>
+    <!-- veredito -->
+    <rect x="16" y="216" width="358" height="84" rx="11" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.08"/>
+    <text x="30" y="254" font-family="Space Grotesk Light" font-weight="700" font-size="28" fill="#4ADE80" letter-spacing="1" filter="url(#textglow)">VERDE</text>
+    <text x="134" y="252" font-family="Inter" font-size="11.5" fill="#A7B0BF">Pode subir campanha</text>
+    <g font-family="JetBrains Mono" font-size="9.5" fill="#A7B0BF">
+      <rect x="30" y="268" width="78" height="18" rx="9" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.08"/><text x="40" y="280.5"><tspan fill="#4ADE80" font-weight="600">9</tspan> em ordem</text>
+      <rect x="114" y="268" width="72" height="18" rx="9" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.08"/><text x="124" y="280.5"><tspan fill="#FBBF24" font-weight="600">1</tspan> atenção</text>
+      <rect x="192" y="268" width="104" height="18" rx="9" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.08"/><text x="202" y="280.5"><tspan fill="#8B94A5" font-weight="600">2</tspan> não conferido</text>
+    </g>
+    <!-- checks -->
+    <text x="18" y="322" font-family="JetBrains Mono" font-size="9" fill="#8B94A5" letter-spacing="1.2">TAGS</text>
+    <g transform="translate(16 330)">
+      <rect width="358" height="40" rx="9" fill="#ffffff" fill-opacity="0.035" stroke="#ffffff" stroke-opacity="0.08"/>
+      <circle cx="14" cy="16" r="3.5" fill="#4ADE80"/>
+      <text x="26" y="18" font-family="Inter" font-weight="500" font-size="11" fill="#EDF1F7">GA4 disparando (G-EXEMPLO001)</text>
+      <text x="26" y="31" font-family="JetBrains Mono" font-size="9" fill="#8B94A5">page_view enviado 1x</text>
+    </g>
+    <g transform="translate(16 376)">
+      <rect width="358" height="40" rx="9" fill="#ffffff" fill-opacity="0.035" stroke="#ffffff" stroke-opacity="0.08"/>
+      <circle cx="14" cy="16" r="3.5" fill="#FBBF24"/>
+      <text x="26" y="18" font-family="Inter" font-weight="500" font-size="11" fill="#EDF1F7">Sem Microsoft Clarity</text>
+      <text x="26" y="31" font-family="JetBrains Mono" font-size="9" fill="#8B94A5">atenção · instale pelo GTM</text>
+    </g>
+    <text x="18" y="438" font-family="JetBrains Mono" font-size="9" fill="#8B94A5" letter-spacing="1.2">TESTE DE ENVIO</text>
+    <g transform="translate(16 446)">
+      <rect width="358" height="40" rx="9" fill="#ffffff" fill-opacity="0.035" stroke="#ffffff" stroke-opacity="0.08"/>
+      <circle cx="14" cy="16" r="3.5" fill="#4ADE80"/>
+      <text x="26" y="18" font-family="Inter" font-weight="500" font-size="11" fill="#EDF1F7">Meta recebeu Lead (3333000033330000)</text>
+      <text x="26" y="31" font-family="JetBrains Mono" font-size="9" fill="#8B94A5">2,1 s após o envio</text>
+    </g>
+    <g transform="translate(16 492)">
+      <rect width="358" height="40" rx="9" fill="#ffffff" fill-opacity="0.035" stroke="#ffffff" stroke-opacity="0.08"/>
+      <circle cx="14" cy="16" r="3.5" fill="#4ADE80"/>
+      <text x="26" y="18" font-family="Inter" font-weight="500" font-size="11" fill="#EDF1F7">Origem foi junto no envio</text>
+      <text x="26" y="31" font-family="JetBrains Mono" font-size="9" fill="#8B94A5">utm_source, utm_campaign no corpo do POST</text>
+    </g>
+  </g>
+
+  <!-- chips flutuantes -->
+  <g font-family="JetBrains Mono" font-size="12">
+    <g transform="translate(556 194)">
+      <rect width="218" height="38" rx="11" fill="#0D121A" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.16"/>
+      <circle cx="18" cy="19" r="3.5" fill="#4ADE80"/>
+      <text x="30" y="23.5" fill="#EDF1F7">fbq('track','Lead') <tspan fill="#4ADE80" font-weight="600">✓ 2,1 s</tspan></text>
+    </g>
+    <g transform="translate(1010 352)">
+      <rect width="176" height="38" rx="11" fill="#0D121A" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.16"/>
+      <circle cx="18" cy="19" r="3.5" fill="#4ADE80"/>
+      <text x="30" y="23.5" fill="#A7B0BF"><tspan fill="#EDF1F7">utm</tspan> → CRM <tspan fill="#4ADE80" font-weight="600">✓</tspan></text>
+    </g>
+    <g transform="translate(560 452)">
+      <rect width="246" height="38" rx="11" fill="#0D121A" fill-opacity="0.92" stroke="#ffffff" stroke-opacity="0.16"/>
+      <circle cx="18" cy="19" r="3.5" fill="#4ADE80"/>
+      <text x="30" y="23.5" fill="#A7B0BF">WhatsApp <tspan fill="#EDF1F7">(11) 99999-0000</tspan> <tspan fill="#4ADE80" font-weight="600">ok</tspan></text>
+    </g>
+  </g>
+</svg>
