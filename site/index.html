@@ -253,6 +253,7 @@
     .laudo .ok { --c: var(--pass); } .laudo .ok::before { content: '✓'; }
     .laudo .at { --c: var(--warn); } .laudo .at::before { content: '!'; }
     .laudo .nd { --c: var(--unknown); } .laudo .nd::before { content: '?'; }
+    .laudo .cr { --c: var(--fail); } .laudo .cr::before { content: '✕'; }
     .laudo .sub { padding-left: 44px; color: var(--text-3); }
     .laudo .sub b { color: var(--accent); font-weight: 600; }
     .principles { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
@@ -327,6 +328,7 @@
       <div class="nav-links">
         <a href="#problema">O problema</a>
         <a href="#teste">Teste de envio</a>
+        <a href="#compra">Loja e vendas</a>
         <a href="#confere">O que confere</a>
         <a href="#laudo">O laudo</a>
         <a href="#faq">Dúvidas</a>
@@ -456,6 +458,39 @@
             <div><span class="w">!</span><span>Clarity não encontrado</span><span class="ms"></span></div>
             <div class="sum"><span></span><span>VERDE · 6 em ordem · 1 atenção</span><span></span></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compra" class="tight">
+    <div class="wrap">
+      <div class="two">
+        <div class="reveal">
+          <span class="eyebrow">Loja e página de vendas</span>
+          <h2>Vende na página? Então o laudo vai até o <span class="hl">checkout</span></h2>
+          <p style="color:var(--text-2);font-size:17px;margin-top:18px">O erro mais caro de uma página de vendas é a venda chegar sem campanha: a Meta e o Google Ads não aprendem com ela e você não sabe qual anúncio pagou. O Track Eye reconhece a plataforma e confere o funil de compra inteiro, sem precisar vender nada.</p>
+          <ul class="finds-l">
+            <li><svg><use href="#i-check"/></svg>O produto foi visto: ViewContent na Meta e view_item no GA4 ao carregar</li>
+            <li><svg><use href="#i-check"/></svg>O link de checkout leva a origem (utm, e src e sck na Hotmart); em loja própria, aceita a origem guardada em cookie</li>
+            <li><svg><use href="#i-check"/></svg>Teste de clique: ele clica no botão de compra e prova se InitiateCheckout e begin_checkout saem, e com quais parâmetros o checkout abre</li>
+            <li><svg><use href="#i-check"/></svg>Purchase fica dito como não conferido até uma compra de teste; nada é forçado nem inventado</li>
+          </ul>
+          <p class="muted" style="font-size:13.5px;margin-top:22px">Reconhece Hotmart, Kiwify, Eduzz, Monetizze, Braip, Ticto, PerfectPay, Cakto e outros checkouts; Shopify, WooCommerce, Nuvemshop, Tray, VTEX, Yampi, Cartpanda e outras lojas.</p>
+        </div>
+        <div class="laudo reveal" aria-label="Exemplo do grupo Compra no laudo">
+          <h4>Track Eye · Laudo de rastreamento · Compra</h4>
+          <div>Página de vendas · Hotmart · Produto: Curso Exemplo · BRL 497,00</div>
+          <div class="h">Achados</div>
+          <div class="l cr" style="--c:var(--fail)">1 de 2 links de checkout externo sem origem (utm, src, sck)</div>
+          <div class="sub"><b>O que fazer:</b> repasse a UTM da página para o link; na Hotmart, use src e sck. Sem isso a venda chega sem campanha.</div>
+          <div class="h">Em ordem</div>
+          <div class="l ok">ViewContent disparou na Meta ao carregar a página</div>
+          <div class="l ok">Meta recebeu InitiateCheckout após o clique de compra (3333000033330000)</div>
+          <div class="l ok">Clique levou ao checkout (pay.hotmart.com) com src e sck</div>
+          <div class="h">Não deu para conferir</div>
+          <div class="l nd">Evento de compra (Purchase) não dá para conferir sem uma compra</div>
+          <div class="sub"><b>Como conferir:</b> faça uma compra de teste de R$ 1 com o painel aberto até a página de obrigado.</div>
         </div>
       </div>
     </div>
