@@ -33,6 +33,8 @@ O resultado entra no laudo como bloco "Teste de envio". Lembre: é um lead de ve
 
 **Exportar.** Copiar laudo (markdown completo), Copiar resumo (versão curta para grupo ou Discord), Baixar .md, Print da página (PNG) e Salvar no histórico.
 
+**Testar clique de compra.** Aparece quando a varredura encontra botão de compra ou link de checkout (loja ou página de vendas). Escolha o botão, confirme, e o Track Eye clica nele e observa por 8 segundos: `InitiateCheckout` (ou `AddToCart`) na Meta, `begin_checkout` no GA4, para onde o checkout foi e se a origem (`utm`, `src`, `sck`) chegou na URL. Nada é preenchido nem pago; a aba para no checkout. O evento de compra (`Purchase`) só aparece no laudo se for observado numa compra de teste feita por você com o painel aberto; sem isso fica como "não deu para conferir".
+
 ## Aba Projetos
 
 É o que transforma a varredura em comparação. Cada projeto tem:

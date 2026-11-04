@@ -31,6 +31,7 @@ Conferir isso na mão leva meia hora, exige abrir o GTM Preview, o gerenciador d
 - **Vê as tags de verdade.** Não é "está no código": ele observa as requisições de rede e diz se o GTM carregou, se o GA4 mandou `page_view`, se o pixel da Meta disparou, se tem duplicado.
 - **Confere o WhatsApp.** Todos os botões e links, com número, mensagem pré-preenchida e identificação de origem. Cadastre o projeto e qualquer número diferente vira crítico.
 - **Entende o formulário.** Elementor, Contact Form 7, HubSpot, RD, GoHighLevel, webhook, React, quiz, widget em iframe, formulário sem `<form>`. Mostra campos, destino e se a origem (UTM) vai junto.
+- **Confere a compra em loja e página de vendas.** Reconhece a plataforma (Shopify, WooCommerce, Nuvemshop, Hotmart, Kiwify, Eduzz e outras), vê se `ViewContent`/`view_item` disparou, se os links de checkout levam a origem (`utm`, `src`, `sck`) e, com um clique no botão de compra, se `InitiateCheckout`/`begin_checkout` sai e o checkout abre com os parâmetros. O evento de compra em si fica como "não conferido" até uma compra de teste.
 - **Abre a página com UTM de teste.** Um clique monta a URL da aba (ou uma colada) com parâmetros de origem conhecidos, abre e varre. Assim dá para provar se a UTM chega ao WhatsApp, aos campos ocultos e ao CRM.
 - **Testa o envio de ponta a ponta.** Preenche com dados marcados como teste, percorre o quiz sozinho se precisar, envia e observa: a requisição saiu? Meta recebeu `Lead`? GA4 recebeu `generate_lead`? Google Ads contou a conversão? A UTM foi no corpo do envio?
 - **Olha a saúde básica.** HTTPS, CSS que não carregou, erros de JavaScript, título, viewport, tempo de carregamento.
@@ -80,6 +81,7 @@ O guia completo, aba por aba, está em [docs/guia.md](docs/guia.md).
 | **Formulários** | Provedor, campos, destino do envio, HTTP sem criptografia, formulário longo, captcha, origem (campos ocultos de UTM, storage ou confirmação pelo teste), iframes varridos frame a frame, formulário sem `<form>`, formulário oculto até uma etapa |
 | **UTM** | Parâmetros na URL e propagação para links de WhatsApp e campos ocultos; URL de teste com UTM gerada pelo painel (modelo configurável na engrenagem, `{data}` vira a data do dia) |
 | **Saúde** | HTTPS, CSS que não carregou, recursos com erro, erros de JavaScript, title, viewport, description, tempo de carregamento |
+| **Compra** | Tipo de página (loja ou página de vendas) e plataforma; produto (schema.org); botões de compra e links de checkout com ou sem origem (`utm_*`, `src`, `sck`, `xcod`); `ViewContent`/`view_item` na visita; teste de clique de compra: `InitiateCheckout`/`AddToCart` na Meta, `begin_checkout`/`add_to_cart` no GA4, navegação ao checkout e parâmetros que chegaram; `Purchase`/`purchase` só quando observado |
 | **Teste de envio** | Avanço automático por quiz ou etapas (ou espera o analista chegar ao formulário), preenchimento, sinal real de envio, mensagem de sucesso ou página de obrigado, `Lead` na Meta, `generate_lead` no GA4, conversão no Google Ads, UTM no corpo do envio |
 
 Como ler cada item do laudo: [docs/laudo.md](docs/laudo.md).
@@ -101,7 +103,7 @@ O Track Eye só observa. Não bloqueia requisição, não altera a página, não
 
 ```bash
 npm install     # só jsdom, para os testes
-npm test        # 35 testes: scanner, regras, rede, laudo, quiz, widgets e UTM de teste
+npm test        # 42 testes: scanner, regras, rede, laudo, quiz, widgets, UTM de teste e compra
 npm run icons   # regenera os ícones PNG
 ```
 

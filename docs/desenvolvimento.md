@@ -77,7 +77,7 @@ A varredura animada do hero é só CSS e JavaScript no próprio `index.html`: ca
 
 ## Estado (04/11/2026)
 
-- Versão 0.3.0, alfa. Varredura, teste de envio (inclusive em quiz, com avanço automático e modo de espera), URL de teste com UTM (`src/utm.js`, modelo na engrenagem), projetos, histórico e laudo funcionando em páginas reais.
+- Versão 0.4.0, alfa. Varredura, teste de envio (inclusive em quiz, com avanço automático e modo de espera), URL de teste com UTM (`src/utm.js`, modelo na engrenagem), grupo Compra (plataforma de loja ou checkout, links de checkout com origem, eventos de funil, teste de clique de compra via `trackEyeClickBuy` + `clickBuy` no background), projetos, histórico e laudo funcionando em páginas reais. O acompanhamento de uma compra de teste até o obrigado (`Purchase` com valor) ainda não existe: hoje o laudo só registra `Purchase`/`purchase` se o evento aparecer na visita.
 - Identidade visual atual (04/11/2026): fundo `#07090D`, texto `#EDF1F7`, verde-sinal `#5BFFB0`, Space Grotesk + Inter + JetBrains Mono; a mesma na extensão (`panel.css`), no `mark.svg`, no `logo.svg`, nos ícones PNG e no site. A interface fala "projeto" (no código os nomes continuam `clients`).
 - Não iniciado: publicação na Chrome Web Store (a instalação é "sem compactação"), detecção de outros provedores de chat e formulário além dos listados em `scanner.js`.
 

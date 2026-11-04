@@ -47,6 +47,12 @@
 
 **"Nenhum sinal de envio."** No teste, nenhuma requisição saiu, não houve redirect nem mensagem de sucesso. Validação, captcha ou etapa obrigatória barrou. Preencha na mão uma vez e observe o que falta.
 
+**"Link(s) de checkout sem origem (utm, src, sck)."** O botão de compra aponta para o checkout (Hotmart, Kiwify, carrinho da loja) sem repassar a origem da página. A venda chega sem campanha. Repasse os parâmetros no link ou por script; na Hotmart use `src` e `sck`.
+
+**"Meta não recebeu InitiateCheckout após o clique."** No teste de clique de compra, o pixel existe mas nada saiu em 8 s. Dispare `InitiateCheckout` no clique do botão (no GTM, gatilho de clique no link do checkout).
+
+**"Evento de compra não dá para conferir sem uma compra."** `Purchase`/`purchase` só dispara na confirmação do pagamento. Para conferir, faça uma compra de teste com o painel aberto até a página de obrigado e veja no inventário se o evento saiu com valor e moeda. Em checkout externo, o evento depende do pixel configurado na plataforma, não da página.
+
 **"Origem foi junto no envio."** As chaves `utm_` apareceram no corpo da requisição ao CRM. O lead chega sabendo de qual campanha veio.
 
 ## Como usar o laudo
