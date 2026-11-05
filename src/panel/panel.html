@@ -28,6 +28,7 @@
   <nav class="tabs" role="tablist">
     <button class="tab is-active" data-view="home" role="tab">Início</button>
     <button class="tab" data-view="diagnosis" role="tab">Diagnóstico</button>
+    <button class="tab" data-view="utm" role="tab">UTM</button>
     <button class="tab" data-view="more" role="tab">Mais</button>
   </nav>
 
@@ -147,6 +148,25 @@
           </details>
         </div>
       </div>
+    </section>
+
+    <!-- ===== Gerador de UTM ===== -->
+    <section class="view" id="view-utm">
+      <label class="field"><span>URL da página</span><input class="input" id="gen-url" placeholder="https://lp.exemplo.com.br/" spellcheck="false"></label>
+      <label class="field"><span>Plataforma</span><select id="gen-platform"></select></label>
+      <div class="gen-grid">
+        <div class="field gen-field"><label for="gen-source">Source *</label><input class="input mono" id="gen-source" data-field="source" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-source" hidden></div></div>
+        <div class="field gen-field"><label for="gen-medium">Medium *</label><input class="input mono" id="gen-medium" data-field="medium" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-medium" hidden></div></div>
+        <div class="field gen-field gen-wide"><label for="gen-campaign">Campaign *</label><input class="input mono" id="gen-campaign" data-field="campaign" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-campaign" hidden></div></div>
+        <div class="field gen-field"><label for="gen-content">Content</label><input class="input mono" id="gen-content" data-field="content" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-content" hidden></div></div>
+        <div class="field gen-field"><label for="gen-term">Term</label><input class="input mono" id="gen-term" data-field="term" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-term" hidden></div></div>
+      </div>
+      <div class="utm-preview mono" id="gen-preview"></div>
+      <div class="row">
+        <button class="btn btn-primary" id="btn-gen-url" type="button" disabled>Copiar URL</button>
+        <button class="btn btn-ghost" id="btn-gen-params" type="button" disabled>Copiar parâmetros</button>
+      </div>
+      <p class="small muted gen-help tip-host">Parâmetros vão no campo da plataforma <button class="tip" type="button" aria-label="No Meta, em Parâmetros de URL. No Google e no Bing, em Modelo de acompanhamento (já vem com {lpurl}). No LinkedIn, já vem com o account_id." data-tip="No Meta, em Parâmetros de URL. No Google e no Bing, em Modelo de acompanhamento (já vem com {lpurl}). No LinkedIn, já vem com o account_id.">?</button></p>
     </section>
 
     <!-- ===== Mais: projetos e histórico ===== -->

@@ -4,6 +4,7 @@ import { summarize, TRACK_STATE } from '../summary.js';
 import { toMarkdown, toShort, fmtDate } from '../report.js';
 import * as db from '../clients.js';
 import { withTestUtm, DEFAULT_UTM_TEMPLATE } from '../utm.js';
+import { PLATFORMS as UTM_PLATFORMS, UTM_FIELDS, getPlatform, missingFields, buildUtmUrl, buildPlatformParams } from '../utm-builder.js';
 
 if (!globalThis.chrome || !chrome.runtime || !chrome.runtime.id) {
   // Pré-visualização fora da extensão (navegador comum): carrega um chrome falso.
@@ -109,6 +110,7 @@ async function renderPage() {
   urlEl.title = ok ? t.url : '';
   $('btn-scan').disabled = !ok; $('btn-reload').disabled = !ok;
   if (ok && !state.utmEdited) { $('utm-url').value = t.url; renderUtmPreview(); }
+  if (ok && !state.genUrlEdited) { $('gen-url').value = t.url; renderGenerator(); }
   state.clients = await db.listClients();
   $('page-client').innerHTML = state.client ? `<span class="badge brand"><span class="dot"></span>${esc(state.client.name)}</span>` : '';
   $('client-pick').innerHTML = ['<option value="">Sem projeto</option>', ...state.clients.map((c) => `<option value="${esc(c.id)}" ${state.client && state.client.id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`)].join('');
@@ -431,6 +433,63 @@ $('btn-test').addEventListener('click', async () => {
     $('test-progress').hidden = true; $('btn-test').disabled = false;
   }
 });
+
+// ---------------- gerador de UTM ----------------
+const genParams = () => Object.fromEntries(UTM_FIELDS.map((f) => [f, $(`gen-${f}`).value]));
+const genPlatform = () => getPlatform($('gen-platform').value);
+
+function renderGenerator() {
+  const params = genParams();
+  const missing = missingFields(params);
+  const preview = $('gen-preview');
+  let url = '';
+  let problem = missing.length ? `Preencha: ${missing.join(', ')}.` : '';
+  if (!problem) { try { url = buildUtmUrl($('gen-url').value, params); } catch (e) { problem = e.message; } }
+  preview.textContent = url || problem;
+  preview.classList.toggle('err', !url);
+  $('btn-gen-url').disabled = !url;
+  $('btn-gen-params').disabled = !!missing.length;
+}
+
+function fillPlatformDefaults() {
+  const { defaults } = genPlatform();
+  for (const f of UTM_FIELDS) $(`gen-${f}`).value = defaults[f] || '';
+  renderGenerator();
+}
+
+function showSuggestions(input) {
+  const f = input.dataset.field;
+  const box = $(`suggest-${f}`);
+  const items = genPlatform().suggestions[f] || [];
+  box.replaceChildren(...items.map((value) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'suggestion mono'; b.textContent = value;
+    // mousedown vem antes do blur do campo, que fecharia a lista antes do clique
+    b.addEventListener('mousedown', (e) => { e.preventDefault(); input.value = value; box.hidden = true; renderGenerator(); });
+    return b;
+  }));
+  box.hidden = !items.length;
+}
+
+$('gen-platform').innerHTML = UTM_PLATFORMS.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+$('gen-platform').addEventListener('change', fillPlatformDefaults);
+$('gen-url').addEventListener('input', () => { state.genUrlEdited = $('gen-url').value.trim() !== (state.tab && state.tab.url); renderGenerator(); });
+for (const f of UTM_FIELDS) {
+  const input = $(`gen-${f}`);
+  input.addEventListener('input', renderGenerator);
+  input.addEventListener('focus', () => showSuggestions(input));
+  input.addEventListener('click', () => showSuggestions(input));
+  input.addEventListener('blur', () => { $(`suggest-${f}`).hidden = true; });
+  // Arrastar a barra de rolagem da lista não pode tirar o foco do campo.
+  $(`suggest-${f}`).addEventListener('mousedown', (e) => e.preventDefault());
+}
+$('btn-gen-url').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(buildUtmUrl($('gen-url').value, genParams())); toast('URL com UTM copiada'); } catch (e) { toast(e.message, true); }
+});
+$('btn-gen-params').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(buildPlatformParams(genPlatform().id, genParams())); toast('Parâmetros copiados'); } catch (e) { toast(e.message, true); }
+});
+renderGenerator();
 
 // ---------------- exportação ----------------
 async function buildMd() {
