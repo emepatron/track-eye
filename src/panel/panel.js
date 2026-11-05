@@ -1,8 +1,10 @@
 // Painel lateral do Track Eye.
 import { evaluate, GROUP_LABELS, STATUS_LABELS, formatPhone } from '../rules.js';
+import { summarize, TRACK_STATE } from '../summary.js';
 import { toMarkdown, toShort, fmtDate } from '../report.js';
 import * as db from '../clients.js';
 import { withTestUtm, DEFAULT_UTM_TEMPLATE } from '../utm.js';
+import { PLATFORMS as UTM_PLATFORMS, UTM_FIELDS, getPlatform, missingFields, buildUtmUrl, buildPlatformParams } from '../utm-builder.js';
 
 if (!globalThis.chrome || !chrome.runtime || !chrome.runtime.id) {
   // Pré-visualização fora da extensão (navegador comum): carrega um chrome falso.
@@ -22,7 +24,11 @@ const state = {
   navs: [],
   test: null,
   result: null,
-  filter: 'all',
+  summary: null,
+  scanning: false,
+  scanSeq: 0,          // só a varredura mais recente pode gravar o resultado
+  scanError: null,     // { url, message } da última falha, para não repetir sozinho
+  filter: 'issues',
   editingClient: null,
   historyOpen: null,
 };
@@ -45,80 +51,187 @@ function toast(text, err = false) {
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ---------------- navegação entre views ----------------
-for (const b of document.querySelectorAll('.tab')) {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('is-active', x === b));
-    document.querySelectorAll('.view').forEach((v) => v.classList.toggle('is-active', v.id === `view-${b.dataset.view}`));
-    if (b.dataset.view === 'clients') renderClients();
-    if (b.dataset.view === 'history') renderHistory();
-  });
+function showView(name) {
+  document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('is-active', x.dataset.view === name));
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('is-active', v.id === `view-${name}`));
+  if (name === 'more') renderClients();
 }
+function showSub(group, sub) {
+  const box = document.querySelector(`.segmented[data-group="${group}"]`);
+  box.querySelectorAll('.segment').forEach((x) => x.classList.toggle('is-active', x.dataset.sub === sub));
+  box.parentElement.querySelectorAll(':scope > .subview').forEach((v) => v.classList.toggle('is-active', v.id === `sub-${sub}`));
+  if (sub === 'clients') renderClients();
+  if (sub === 'history') renderHistory();
+}
+for (const b of document.querySelectorAll('.tab')) b.addEventListener('click', () => showView(b.dataset.view));
+for (const b of document.querySelectorAll('.segment')) b.addEventListener('click', () => showSub(b.closest('.segmented').dataset.group, b.dataset.sub));
+// O "?" fica dentro do <summary>: o clique mostra a explicação sem abrir a sanfona.
+for (const b of document.querySelectorAll('.tip')) b.addEventListener('click', (e) => e.preventDefault());
+$('btn-go-diagnosis').addEventListener('click', () => { showView('diagnosis'); showSub('diagnosis', 'findings'); });
 
 // ---------------- aba ativa ----------------
+const isWeb = (t) => !!t && /^https?:/.test(t.url || '');
+
+function clearResult() {
+  state.scanSeq++;
+  state.scanning = false;
+  state.scan = null; state.result = null; state.summary = null; state.test = null; state.buy = null;
+  renderScanState();
+}
+
 async function refreshTab() {
   const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-  const changed = !state.tab || !tab || state.tab.id !== tab.id || state.tab.url !== tab.url;
+  const otherTab = !state.tab || !tab || state.tab.id !== tab.id;
+  const changed = otherTab || state.tab.url !== tab.url;
   state.tab = tab || null;
   if (changed) {
     const host = (() => { try { return new URL(tab.url).hostname; } catch { return ''; } })();
     state.client = host ? await db.findClientByHost(host) : null;
-    if (state.scan && state.scan.url !== (tab && tab.url) && !state.testRunning) {
-      // outra página: zera o resultado anterior
-      state.scan = null; state.result = null; state.test = null;
-      $('scan-result').hidden = true; $('scan-empty').hidden = false;
-    }
+    // outra página ou outra aba: o resultado anterior não vale mais
+    if (!state.testRunning && (otherTab || (state.scan && state.scan.url !== (tab && tab.url)))) clearResult();
   }
-  renderPage();
+  await renderPage();
+  autoScan();
 }
 chrome.tabs.onActivated.addListener(refreshTab);
-chrome.tabs.onUpdated.addListener((id, info) => { if (info.status === 'complete' || info.url) refreshTab(); });
+chrome.tabs.onUpdated.addListener((id, info) => {
+  if (!info.url && info.status !== 'complete') return;
+  // Página terminou de carregar na aba ativa: é uma visita nova, mesmo com a mesma URL.
+  if (info.status === 'complete' && state.tab && state.tab.id === id && !state.testRunning) clearResult();
+  refreshTab();
+});
 
 async function renderPage() {
   const t = state.tab;
-  const ok = t && /^https?:/.test(t.url || '');
+  const ok = isWeb(t);
   $('page-title').textContent = ok ? (t.title || t.url) : 'Nenhuma página web na aba ativa';
-  $('page-url').textContent = ok ? t.url : 'Abra uma landing page e volte aqui.';
+  const urlEl = $('page-url');
+  urlEl.textContent = ok ? new URL(t.url).hostname : 'Abra uma landing page e volte aqui.';
+  urlEl.title = ok ? t.url : '';
   $('btn-scan').disabled = !ok; $('btn-reload').disabled = !ok;
   if (ok && !state.utmEdited) { $('utm-url').value = t.url; renderUtmPreview(); }
+  if (ok && !state.genUrlEdited) { $('gen-url').value = t.url; renderGenerator(); }
   state.clients = await db.listClients();
-  const box = $('page-client');
-  const opts = ['<option value="">Sem projeto</option>', ...state.clients.map((c) => `<option value="${c.id}" ${state.client && state.client.id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`)].join('');
-  box.innerHTML = (state.client
-    ? `<span class="badge brand"><span class="dot"></span>${esc(state.client.name)}</span>`
-    : `<span class="badge">Projeto não identificado</span>`) + `<select class="inline" id="client-pick">${opts}</select>`;
-  $('client-pick').addEventListener('change', (e) => {
-    state.client = state.clients.find((c) => c.id === e.target.value) || null;
-    renderPage();
-    if (state.scan) { reevaluate(); }
-  });
+  $('page-client').innerHTML = state.client ? `<span class="badge brand"><span class="dot"></span>${esc(state.client.name)}</span>` : '';
+  $('client-pick').innerHTML = ['<option value="">Sem projeto</option>', ...state.clients.map((c) => `<option value="${esc(c.id)}" ${state.client && state.client.id === c.id ? 'selected' : ''}>${esc(c.name)}</option>`)].join('');
+  renderScanState();
 }
+$('client-pick').addEventListener('change', (e) => {
+  state.client = state.clients.find((c) => c.id === e.target.value) || null;
+  renderPage();
+  if (state.scan) reevaluate();
+});
 
 // ---------------- varredura ----------------
+// Roda sozinha quando a página está pronta e ainda não há resultado: a verificação
+// rápida é o uso mais comum. Só lê a página; nada é enviado nem clicado.
+function autoScan() {
+  const t = state.tab;
+  if (!isWeb(t) || t.status === 'loading' || state.testRunning || state.scan || state.scanning) return;
+  if (state.scanError && state.scanError.url === t.url) return;
+  runScan();
+}
+
 async function runScan() {
-  if (!state.tab) return;
-  $('btn-scan').disabled = true;
-  $('btn-scan').textContent = 'Varrendo…';
+  if (!isWeb(state.tab)) return;
+  const seq = ++state.scanSeq;
+  const { id: tabId, url } = state.tab;
+  state.scanning = true; state.scanError = null;
+  renderScanState();
   try {
-    const r = await send({ type: 'scan', tabId: state.tab.id });
+    const r = await send({ type: 'scan', tabId });
+    if (seq !== state.scanSeq) return;
     if (!r || !r.scan) throw new Error('A página não respondeu. Recarregue e tente de novo.');
     state.scan = r.scan; state.probe = r.probe || null; state.deep = r.deep || null; state.events = r.events || []; state.navs = r.navs || []; state.test = null; state.buy = null;
+    state.scanning = false;
     reevaluate();
-    $('scan-empty').hidden = true; $('scan-result').hidden = false;
-    toast('Varredura concluída');
+    watchLateEvents(seq, tabId);
   } catch (e) {
-    toast(e.message, true);
-  } finally {
-    $('btn-scan').disabled = false;
-    $('btn-scan').innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> Varrer página';
+    if (seq !== state.scanSeq) return;
+    state.scanning = false;
+    state.scan = null; state.result = null; state.summary = null;
+    state.scanError = { url, raw: e.message };
+    renderScanState();
   }
 }
 $('btn-scan').addEventListener('click', runScan);
 $('btn-reload').addEventListener('click', async () => {
   if (!state.tab) return;
   await send({ type: 'clear', tabId: state.tab.id });
+  clearResult();
   await chrome.tabs.reload(state.tab.id);
-  toast('Recarregando… varro em 4 s');
-  setTimeout(runScan, 4000);
+  toast('Recarregando a página…');
+});
+
+// Tag atrasada (consentimento, carregamento adiado) pode disparar depois da leitura.
+// Sem isso, a tela Início diria "sem disparo" para o que disparou segundos depois.
+async function watchLateEvents(seq, tabId) {
+  for (const ms of [3000, 4000]) {
+    await new Promise((r) => setTimeout(r, ms));
+    if (seq !== state.scanSeq || state.testRunning || !state.scan) return;
+    const r = await send({ type: 'events', tabId }).catch(() => null);
+    if (seq !== state.scanSeq || !r || !r.events || r.events.length === state.events.length) continue;
+    state.events = r.events; state.navs = r.navs || state.navs;
+    reevaluate();
+  }
+}
+
+const STATUS_TEXT = { rastreada: 'RASTREADA', parcial: 'SEM DISPARO CONFIRMADO', sem: 'SEM RASTREAMENTO', indefinido: 'NÃO DEU PARA CONFERIR' };
+const VERDICT_COUNTS = { fail: ['crítico', 'críticos'], warn: ['atenção', 'atenção'] };
+const COPY_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
+
+function trackLabel(row) {
+  if (row.state === TRACK_STATE.fired) return row.platform === 'gtm' ? 'Carregou' : 'Disparou';
+  if (row.state === TRACK_STATE.loaded) return 'Carregou, sem disparo';
+  if (row.state === TRACK_STATE.frame) return 'Disparou em iframe';
+  return 'Só no código';
+}
+
+// Desenha tudo o que depende da varredura: Início, Diagnóstico e Testes.
+function renderScanState() {
+  const t = state.tab;
+  const s = state.summary;
+  let status = 'idle', label = 'AGUARDANDO', detail = '';
+  if (!isWeb(t)) detail = 'Abra uma landing page para verificar.';
+  else if (state.scanning) { status = 'scanning'; label = 'VARRENDO…'; detail = 'Lendo as tags e os disparos da página.'; }
+  else if (state.scanError) { status = 'indefinido'; label = 'NÃO DEU PARA VARRER'; detail = 'Recarregue e tente de novo. Páginas internas do navegador e a loja de extensões não permitem a leitura.'; }
+  else if (s) { status = s.status; label = STATUS_TEXT[s.status]; detail = s.detail; }
+  else { status = 'scanning'; label = 'CARREGANDO…'; detail = 'Varro assim que a página terminar de carregar.'; }
+
+  $('status').dataset.status = status;
+  $('status-label').textContent = label;
+  $('status-detail').textContent = detail;
+  $('status-detail').title = state.scanError ? state.scanError.raw : '';
+  $('btn-scan').classList.toggle('is-spinning', state.scanning);
+
+  $('tag-list').hidden = !s || !s.rows.length;
+  $('tag-list').innerHTML = s ? s.rows.map((r) => `<li class="tag-row ${r.state}"><div class="tag-info"><div class="tag-name">${esc(r.label)}</div><div class="tag-id mono">${r.id ? esc(r.id) : 'código não identificado'}</div></div><span class="tag-state">${trackLabel(r)}</span>${r.id ? `<button class="copy-btn" type="button" data-copy="${esc(r.id)}" title="Copiar ${esc(r.id)}" aria-label="Copiar ${esc(r.id)}">${COPY_ICON}</button>` : ''}</li>`).join('') : '';
+  $('not-found').hidden = !s || !s.notFound.length || s.status === 'sem';
+  $('not-found').textContent = s ? `Não encontrados: ${s.notFound.join(', ')}.` : '';
+  $('status-note').hidden = !s || !s.note;
+  $('status-note').textContent = s ? s.note : '';
+
+  const r = state.result;
+  const go = $('btn-go-diagnosis');
+  go.hidden = !r;
+  if (r) {
+    const parts = ['fail', 'warn'].filter((k) => r.counts[k]).map((k) => `${r.counts[k]} ${VERDICT_COUNTS[k][r.counts[k] === 1 ? 0 : 1]}`);
+    go.textContent = `Ver diagnóstico${parts.length ? ` (${parts.join(', ')})` : ''} →`;
+  }
+  const emphasize = !!(s && s.needsReload);
+  $('btn-reload').classList.toggle('btn-primary', emphasize);
+  $('btn-reload').classList.toggle('btn-ghost', !emphasize);
+
+  const hasScan = !!state.scan;
+  $('diagnosis-empty').hidden = hasScan;
+  $('diagnosis-result').hidden = !hasScan;
+  $('tests-empty').hidden = hasScan;
+  $('tests-result').hidden = !hasScan;
+}
+$('tag-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('.copy-btn');
+  if (!b) return;
+  try { await navigator.clipboard.writeText(b.dataset.copy); toast(`Copiado: ${b.dataset.copy}`); } catch (err) { toast(err.message, true); }
 });
 
 // ---------------- abrir com UTM de teste ----------------
@@ -141,8 +254,7 @@ $('btn-utm-open').addEventListener('click', async () => {
   await send({ type: 'clear', tabId: state.tab.id });
   await chrome.tabs.update(state.tab.id, { url });
   state.utmEdited = false;
-  toast('Abrindo com UTM… varro em 4 s');
-  setTimeout(runScan, 4000);
+  toast('Abrindo com UTM…');
 });
 $('btn-utm-new').addEventListener('click', async () => {
   try { await chrome.tabs.create({ url: testUrl() }); } catch (e) { toast(e.message, true); }
@@ -153,7 +265,15 @@ $('btn-utm-copy').addEventListener('click', async () => {
 
 function reevaluate() {
   state.result = evaluate({ scan: state.scan, probe: state.probe, deep: state.deep, events: state.events, navs: state.navs, client: state.client, test: state.test, buy: state.buy });
+  state.summary = summarize({ scan: state.scan, probe: state.probe, events: state.events, navs: state.navs, test: state.test });
   renderResult();
+  renderScanState();
+}
+
+// Depois de um teste, o resultado precisa aparecer mesmo que tenha dado tudo certo.
+function showTestOutcome() {
+  setFilter('all');
+  showSub('diagnosis', 'findings');
 }
 
 // ---------------- teste de clique de compra ----------------
@@ -173,6 +293,7 @@ $('btn-buy').addEventListener('click', async () => {
     state.events = r.events || state.events; state.navs = r.navs || state.navs;
     state.buy = { ...clicked, button: b };
     reevaluate();
+    showTestOutcome();
     toast('Clique observado');
   } catch (e) {
     toast(e.message, true);
@@ -195,18 +316,18 @@ function renderResult() {
   const keep = (c) => f === 'all' || (f === 'issues' && (c.status === 'fail' || c.status === 'warn')) || (f === 'pass' && c.status === 'pass') || (f === 'unknown' && (c.status === 'unknown' || c.status === 'info'));
   const order = { fail: 0, warn: 1, unknown: 2, info: 3, pass: 4 };
   const groups = ['teste', 'compra', 'tags', 'whatsapp', 'forms', 'utm', 'saude'];
+  const openIds = new Set([...$('checks').querySelectorAll('.check[open]')].map((el) => el.dataset.id));
   let html = '';
   for (const g of groups) {
     const items = r.checks.filter((c) => c.group === g && keep(c)).sort((a, b) => order[a.status] - order[b.status]);
     if (!items.length) continue;
     html += `<div class="group-title">${GROUP_LABELS[g]}</div>`;
     for (const c of items) {
-      const open = c.status === 'fail' ? 'open' : '';
-      html += `<details class="check ${c.status}" ${open}><summary><span class="dot"></span><div><div class="check-title">${esc(c.title)}</div><div class="check-tag">${STATUS_LABELS[c.status]}</div></div><svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary>
+      html += `<details class="check ${c.status}" data-id="${esc(c.id)}" ${openIds.has(c.id) ? 'open' : ''}><summary><span class="dot"></span><div><div class="check-title">${esc(c.title)}</div><div class="check-tag">${STATUS_LABELS[c.status]}</div></div><svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary>
         <div class="check-body">${c.evidence ? `<div class="ev">${esc(c.evidence)}</div>` : ''}${c.fix ? `<div class="fix"><b>Fazer:</b><span>${esc(c.fix)}</span></div>` : ''}${!c.evidence && !c.fix ? '<span class="muted">Sem detalhes.</span>' : ''}</div></details>`;
     }
   }
-  $('checks').innerHTML = html || '<p class="muted">Nada neste filtro.</p>';
+  $('checks').innerHTML = html || `<p class="muted">${f === 'issues' ? 'Nenhum achado nesta página.' : 'Nada neste filtro.'}</p>`;
 
   // formulários disponíveis para o teste
   const sel = $('test-form');
@@ -225,10 +346,11 @@ function renderResult() {
 
   renderInventory();
 }
-for (const chip of document.querySelectorAll('#filters .chip')) chip.addEventListener('click', () => {
-  document.querySelectorAll('#filters .chip').forEach((x) => x.classList.toggle('is-active', x === chip));
-  state.filter = chip.dataset.filter; renderResult();
-});
+function setFilter(filter) {
+  document.querySelectorAll('#filters .chip').forEach((x) => x.classList.toggle('is-active', x.dataset.filter === filter));
+  state.filter = filter; renderResult();
+}
+for (const chip of document.querySelectorAll('#filters .chip')) chip.addEventListener('click', () => setFilter(chip.dataset.filter));
 
 function renderInventory() {
   const s = state.scan; const t = s.tags;
@@ -302,6 +424,7 @@ $('btn-test').addEventListener('click', async () => {
     state.test = { ...started, frameId, submissions: after.submissions || [], after: after.after || {}, dataLayerEvents: (after.after && after.after.dataLayerEvents) || [] };
     reevaluate();
     $('test-card').open = false;
+    showTestOutcome();
     toast('Teste concluído: veja o bloco "Teste de envio"');
   } catch (e) {
     toast(e.message, true);
@@ -310,6 +433,63 @@ $('btn-test').addEventListener('click', async () => {
     $('test-progress').hidden = true; $('btn-test').disabled = false;
   }
 });
+
+// ---------------- gerador de UTM ----------------
+const genParams = () => Object.fromEntries(UTM_FIELDS.map((f) => [f, $(`gen-${f}`).value]));
+const genPlatform = () => getPlatform($('gen-platform').value);
+
+function renderGenerator() {
+  const params = genParams();
+  const missing = missingFields(params);
+  const preview = $('gen-preview');
+  let url = '';
+  let problem = missing.length ? `Preencha: ${missing.join(', ')}.` : '';
+  if (!problem) { try { url = buildUtmUrl($('gen-url').value, params); } catch (e) { problem = e.message; } }
+  preview.textContent = url || problem;
+  preview.classList.toggle('err', !url);
+  $('btn-gen-url').disabled = !url;
+  $('btn-gen-params').disabled = !!missing.length;
+}
+
+function fillPlatformDefaults() {
+  const { defaults } = genPlatform();
+  for (const f of UTM_FIELDS) $(`gen-${f}`).value = defaults[f] || '';
+  renderGenerator();
+}
+
+function showSuggestions(input) {
+  const f = input.dataset.field;
+  const box = $(`suggest-${f}`);
+  const items = genPlatform().suggestions[f] || [];
+  box.replaceChildren(...items.map((value) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'suggestion mono'; b.textContent = value;
+    // mousedown vem antes do blur do campo, que fecharia a lista antes do clique
+    b.addEventListener('mousedown', (e) => { e.preventDefault(); input.value = value; box.hidden = true; renderGenerator(); });
+    return b;
+  }));
+  box.hidden = !items.length;
+}
+
+$('gen-platform').innerHTML = UTM_PLATFORMS.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+$('gen-platform').addEventListener('change', fillPlatformDefaults);
+$('gen-url').addEventListener('input', () => { state.genUrlEdited = $('gen-url').value.trim() !== (state.tab && state.tab.url); renderGenerator(); });
+for (const f of UTM_FIELDS) {
+  const input = $(`gen-${f}`);
+  input.addEventListener('input', renderGenerator);
+  input.addEventListener('focus', () => showSuggestions(input));
+  input.addEventListener('click', () => showSuggestions(input));
+  input.addEventListener('blur', () => { $(`suggest-${f}`).hidden = true; });
+  // Arrastar a barra de rolagem da lista não pode tirar o foco do campo.
+  $(`suggest-${f}`).addEventListener('mousedown', (e) => e.preventDefault());
+}
+$('btn-gen-url').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(buildUtmUrl($('gen-url').value, genParams())); toast('URL com UTM copiada'); } catch (e) { toast(e.message, true); }
+});
+$('btn-gen-params').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(buildPlatformParams(genPlatform().id, genParams())); toast('Parâmetros copiados'); } catch (e) { toast(e.message, true); }
+});
+renderGenerator();
 
 // ---------------- exportação ----------------
 async function buildMd() {

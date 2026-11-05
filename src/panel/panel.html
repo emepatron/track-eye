@@ -26,142 +26,196 @@
   </header>
 
   <nav class="tabs" role="tablist">
-    <button class="tab is-active" data-view="scan" role="tab">Varredura</button>
-    <button class="tab" data-view="clients" role="tab">Projetos</button>
-    <button class="tab" data-view="history" role="tab">Histórico</button>
+    <button class="tab is-active" data-view="home" role="tab">Início</button>
+    <button class="tab" data-view="diagnosis" role="tab">Diagnóstico</button>
+    <button class="tab" data-view="utm" role="tab">UTM</button>
+    <button class="tab" data-view="more" role="tab">Mais</button>
   </nav>
 
   <main>
-    <!-- ===== Varredura ===== -->
-    <section class="view is-active" id="view-scan">
-      <div class="card page-card">
+    <!-- ===== Início: a verificação rápida ===== -->
+    <section class="view is-active" id="view-home">
+      <div class="page-head">
         <div class="page-title" id="page-title">—</div>
-        <div class="page-url mono" id="page-url">Abra uma landing page na aba ativa.</div>
-        <div class="page-client" id="page-client"></div>
+        <div class="page-sub">
+          <span class="page-url mono" id="page-url">Abra uma landing page na aba ativa.</span>
+          <span id="page-client"></span>
+        </div>
       </div>
 
-      <div class="actions">
-        <button class="btn btn-primary" id="btn-scan">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-          Varrer página
+      <div class="status" id="status" data-status="idle">
+        <div class="status-main">
+          <div class="status-label"><span class="status-dot"></span><span id="status-label">AGUARDANDO</span></div>
+          <div class="status-detail" id="status-detail"></div>
+        </div>
+        <button class="icon-btn" id="btn-scan" title="Varrer de novo" aria-label="Varrer de novo">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
         </button>
-        <button class="btn btn-ghost" id="btn-reload" title="Recarrega a página com o observador ativo e varre de novo">Recarregar e varrer</button>
       </div>
 
-      <details class="card details-card" id="utm-card">
-        <summary>Abrir com UTM de teste</summary>
-        <div class="details-body">
-          <p class="small muted">Abre a página com parâmetros de origem conhecidos. Assim a varredura e o teste de envio provam se a UTM chega ao WhatsApp, aos campos ocultos e ao CRM.</p>
-          <label class="field"><span>URL da página</span><input class="input" id="utm-url" placeholder="https://lp.exemplo.com.br/" spellcheck="false"></label>
-          <label class="field"><span>Parâmetros (<code>{data}</code> vira a data de hoje)</span><input class="input mono" id="utm-template" placeholder="utm_source=trackeye&amp;utm_medium=teste&amp;utm_campaign=auditoria&amp;utm_content={data}" spellcheck="false"></label>
-          <div class="utm-preview mono" id="utm-preview"></div>
-          <div class="row">
-            <button class="btn btn-primary" id="btn-utm-open" type="button">Abrir aqui e varrer</button>
-            <button class="btn btn-ghost" id="btn-utm-new" type="button">Nova aba</button>
-            <button class="btn btn-ghost" id="btn-utm-copy" type="button">Copiar</button>
-          </div>
-        </div>
-      </details>
+      <ul class="tag-list" id="tag-list" hidden></ul>
+      <p class="not-found" id="not-found" hidden></p>
+      <p class="small warn-text" id="status-note" hidden></p>
 
-      <div id="scan-empty" class="empty">
-        <div class="empty-eye"></div>
-        <p>Clique em <strong>Varrer página</strong> para ver tags, WhatsApp, formulários, UTM e saúde da LP em segundos.</p>
-        <p class="muted small">Dica: abra a LP pelo link do anúncio (com UTM) e, se a página já estava aberta antes da extensão, use <strong>Recarregar e varrer</strong>.</p>
+      <button class="btn btn-ghost btn-block" id="btn-go-diagnosis" type="button" hidden></button>
+      <button class="btn btn-ghost btn-block" id="btn-reload" type="button" title="Recarrega a página com o observador ativo e varre de novo">Recarregar a página e varrer</button>
+    </section>
+
+    <!-- ===== Diagnóstico ===== -->
+    <section class="view" id="view-diagnosis">
+      <div class="segmented" data-group="diagnosis">
+        <button class="segment is-active" data-sub="findings" type="button">Achados</button>
+        <button class="segment" data-sub="tests" type="button">Testes</button>
       </div>
 
-      <div id="scan-result" hidden>
-        <div class="verdict" id="verdict">
-          <div class="verdict-label" id="verdict-label">VERDE</div>
-          <div class="verdict-text" id="verdict-text">Pode subir campanha</div>
-          <div class="counts" id="counts"></div>
+      <div class="subview is-active" id="sub-findings">
+        <p class="muted empty-note" id="diagnosis-empty">O diagnóstico aparece aqui depois da varredura.</p>
+        <div id="diagnosis-result" hidden>
+          <div class="verdict" id="verdict">
+            <div class="verdict-label" id="verdict-label">VERDE</div>
+            <div class="verdict-text" id="verdict-text">Pode subir campanha</div>
+            <div class="counts" id="counts"></div>
+          </div>
+
+          <label class="project-row tip-host">
+            <span>Projeto <button class="tip" type="button" aria-label="Com um projeto cadastrado, qualquer número de WhatsApp diferente do esperado vira crítico." data-tip="Com um projeto cadastrado, qualquer número de WhatsApp diferente do esperado vira crítico.">?</button></span>
+            <select id="client-pick"></select>
+          </label>
+
+          <div class="chips" id="filters">
+            <button class="chip is-active" data-filter="issues">Achados</button>
+            <button class="chip" data-filter="pass">Em ordem</button>
+            <button class="chip" data-filter="unknown">Não conferido</button>
+            <button class="chip" data-filter="all">Tudo</button>
+          </div>
+
+          <div class="checks" id="checks"></div>
+
+          <details class="card details-card">
+            <summary>Exportar laudo</summary>
+            <div class="details-body">
+              <div class="export">
+                <button class="btn btn-ghost" id="btn-copy-md">Copiar laudo</button>
+                <button class="btn btn-ghost" id="btn-copy-short">Copiar resumo</button>
+                <button class="btn btn-ghost" id="btn-download-md">Baixar .md</button>
+                <button class="btn btn-ghost" id="btn-shot">Print da página</button>
+                <button class="btn btn-outline" id="btn-save">Salvar no histórico</button>
+              </div>
+            </div>
+          </details>
         </div>
+      </div>
 
-        <div class="chips" id="filters">
-          <button class="chip is-active" data-filter="all">Tudo</button>
-          <button class="chip" data-filter="issues">Achados</button>
-          <button class="chip" data-filter="pass">Em ordem</button>
-          <button class="chip" data-filter="unknown">Não conferido</button>
-        </div>
-
-        <div class="checks" id="checks"></div>
-
-        <details class="card details-card" id="test-card">
-          <summary>Teste de envio do formulário</summary>
+      <div class="subview" id="sub-tests">
+        <details class="card details-card tip-host" id="utm-card">
+          <summary>Abrir com UTM de teste <button class="tip" type="button" aria-label="Abre a página com parâmetros de origem conhecidos, para provar se a UTM chega ao WhatsApp, aos campos ocultos e ao CRM." data-tip="Abre a página com parâmetros de origem conhecidos, para provar se a UTM chega ao WhatsApp, aos campos ocultos e ao CRM.">?</button></summary>
           <div class="details-body">
-            <p class="small muted">Preenche o formulário com dados marcados como <strong>TESTE TRACK EYE</strong>, envia e observa por 12 segundos: página de obrigado, evento Lead na Meta, conversão no GA4 e no Google Ads.</p>
-            <p class="small warn-text">Isso cria um lead de verdade no CRM do projeto. Apague depois.</p>
-            <label class="field"><span>Formulário</span><select id="test-form"></select></label>
-            <button class="btn btn-danger" id="btn-test">Enviar teste agora</button>
-            <div class="progress" id="test-progress" hidden><div class="bar"></div><span>Observando a página…</span></div>
+            <label class="field"><span>URL da página</span><input class="input" id="utm-url" placeholder="https://lp.exemplo.com.br/" spellcheck="false"></label>
+            <label class="field"><span>Parâmetros (<code>{data}</code> vira a data de hoje)</span><input class="input mono" id="utm-template" placeholder="utm_source=trackeye&amp;utm_medium=teste&amp;utm_campaign=auditoria&amp;utm_content={data}" spellcheck="false"></label>
+            <div class="utm-preview mono" id="utm-preview"></div>
+            <div class="row">
+              <button class="btn btn-primary" id="btn-utm-open" type="button">Abrir e varrer</button>
+              <button class="btn btn-ghost" id="btn-utm-new" type="button">Nova aba</button>
+              <button class="btn btn-ghost" id="btn-utm-copy" type="button">Copiar</button>
+            </div>
           </div>
         </details>
 
-        <details class="card details-card" id="buy-card" hidden>
-          <summary>Testar clique de compra</summary>
-          <div class="details-body">
-            <p class="small muted">Clica no botão de compra escolhido e observa por 8 segundos: InitiateCheckout na Meta, begin_checkout no GA4 e para onde o checkout vai (com quais parâmetros). Não preenche nem paga nada; para no checkout.</p>
-            <label class="field"><span>Botão</span><select id="buy-button"></select></label>
-            <button class="btn btn-outline" id="btn-buy" type="button">Clicar e observar</button>
-            <div class="progress" id="buy-progress" hidden><div class="bar"></div><span>Observando o clique…</span></div>
-          </div>
-        </details>
+        <p class="muted empty-note" id="tests-empty">Os demais testes aparecem depois da varredura.</p>
+        <div id="tests-result" hidden>
+          <details class="card details-card tip-host" id="test-card">
+            <summary>Teste de envio do formulário <button class="tip" type="button" aria-label="Preenche com dados marcados como TESTE TRACK EYE, envia e observa por 12 segundos: página de obrigado, Lead na Meta, conversão no GA4 e no Google Ads." data-tip="Preenche com dados marcados como TESTE TRACK EYE, envia e observa por 12 segundos: página de obrigado, Lead na Meta, conversão no GA4 e no Google Ads.">?</button></summary>
+            <div class="details-body">
+              <p class="small warn-text">Isso cria um lead de verdade no CRM do projeto. Apague depois.</p>
+              <label class="field"><span>Formulário</span><select id="test-form"></select></label>
+              <button class="btn btn-danger" id="btn-test">Enviar teste agora</button>
+              <div class="progress" id="test-progress" hidden><div class="bar"></div><span>Observando a página…</span></div>
+            </div>
+          </details>
 
-        <details class="card details-card" id="inventory-card">
-          <summary>Inventário e eventos observados</summary>
-          <div class="details-body" id="inventory"></div>
-        </details>
+          <details class="card details-card tip-host" id="buy-card" hidden>
+            <summary>Testar clique de compra <button class="tip" type="button" aria-label="Clica no botão escolhido e observa por 8 segundos: InitiateCheckout na Meta, begin_checkout no GA4 e para onde o checkout vai. Não preenche nem paga nada." data-tip="Clica no botão escolhido e observa por 8 segundos: InitiateCheckout na Meta, begin_checkout no GA4 e para onde o checkout vai. Não preenche nem paga nada.">?</button></summary>
+            <div class="details-body">
+              <label class="field"><span>Botão</span><select id="buy-button"></select></label>
+              <button class="btn btn-outline" id="btn-buy" type="button">Clicar e observar</button>
+              <div class="progress" id="buy-progress" hidden><div class="bar"></div><span>Observando o clique…</span></div>
+            </div>
+          </details>
 
-        <div class="export">
-          <button class="btn btn-ghost" id="btn-copy-md">Copiar laudo</button>
-          <button class="btn btn-ghost" id="btn-copy-short">Copiar resumo</button>
-          <button class="btn btn-ghost" id="btn-download-md">Baixar .md</button>
-          <button class="btn btn-ghost" id="btn-shot">Print da página</button>
-          <button class="btn btn-outline" id="btn-save">Salvar no histórico</button>
+          <details class="card details-card" id="inventory-card">
+            <summary>Inventário e eventos observados</summary>
+            <div class="details-body" id="inventory"></div>
+          </details>
         </div>
       </div>
     </section>
 
-    <!-- ===== Projetos ===== -->
-    <section class="view" id="view-clients">
+    <!-- ===== Gerador de UTM ===== -->
+    <section class="view" id="view-utm">
+      <label class="field"><span>URL da página</span><input class="input" id="gen-url" placeholder="https://lp.exemplo.com.br/" spellcheck="false"></label>
+      <label class="field"><span>Plataforma</span><select id="gen-platform"></select></label>
+      <div class="gen-grid">
+        <div class="field gen-field"><label for="gen-source">Source *</label><input class="input mono" id="gen-source" data-field="source" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-source" hidden></div></div>
+        <div class="field gen-field"><label for="gen-medium">Medium *</label><input class="input mono" id="gen-medium" data-field="medium" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-medium" hidden></div></div>
+        <div class="field gen-field gen-wide"><label for="gen-campaign">Campaign *</label><input class="input mono" id="gen-campaign" data-field="campaign" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-campaign" hidden></div></div>
+        <div class="field gen-field"><label for="gen-content">Content</label><input class="input mono" id="gen-content" data-field="content" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-content" hidden></div></div>
+        <div class="field gen-field"><label for="gen-term">Term</label><input class="input mono" id="gen-term" data-field="term" autocomplete="off" spellcheck="false"><div class="suggestions" id="suggest-term" hidden></div></div>
+      </div>
+      <div class="utm-preview mono" id="gen-preview"></div>
       <div class="row">
-        <input class="input" id="client-search" placeholder="Buscar projeto" type="search">
-        <button class="btn btn-primary" id="btn-new-client">Novo</button>
+        <button class="btn btn-primary" id="btn-gen-url" type="button" disabled>Copiar URL</button>
+        <button class="btn btn-ghost" id="btn-gen-params" type="button" disabled>Copiar parâmetros</button>
       </div>
-      <div class="list" id="client-list"></div>
-      <div class="row export-row">
-        <button class="btn btn-ghost" id="btn-export">Exportar JSON</button>
-        <button class="btn btn-ghost" id="btn-import">Importar JSON</button>
-        <input type="file" id="import-file" accept="application/json" hidden>
-      </div>
-      <p class="small muted">Sem Lab nesta versão: exporte o JSON e compartilhe com o time. Importar mescla pelo nome e nunca apaga.</p>
-
-      <form class="card client-form" id="client-form" hidden>
-        <h3 id="client-form-title">Novo projeto</h3>
-        <input type="hidden" id="cf-id">
-        <label class="field"><span>Nome</span><input class="input" id="cf-name" required placeholder="Ex.: Loja Exemplo"></label>
-        <label class="field"><span>Domínios das LPs (um por linha)</span><textarea class="input" id="cf-domains" rows="3" placeholder="lojaexemplo.com.br&#10;lp.lojaexemplo.com.br"></textarea></label>
-        <label class="field"><span>Números de WhatsApp esperados (um por linha)</span><textarea class="input" id="cf-whatsapp" rows="3" placeholder="35 99999-0000"></textarea></label>
-        <label class="field"><span>Observações</span><textarea class="input" id="cf-notes" rows="2" placeholder="Pixel oficial, GTM oficial, quem aprova…"></textarea></label>
-        <div class="row">
-          <button class="btn btn-primary" type="submit">Salvar</button>
-          <button class="btn btn-ghost" type="button" id="cf-cancel">Cancelar</button>
-          <button class="btn btn-ghost danger-text" type="button" id="cf-delete" hidden>Excluir</button>
-        </div>
-      </form>
+      <p class="small muted gen-help tip-host">Parâmetros vão no campo da plataforma <button class="tip" type="button" aria-label="No Meta, em Parâmetros de URL. No Google e no Bing, em Modelo de acompanhamento (já vem com {lpurl}). No LinkedIn, já vem com o account_id." data-tip="No Meta, em Parâmetros de URL. No Google e no Bing, em Modelo de acompanhamento (já vem com {lpurl}). No LinkedIn, já vem com o account_id.">?</button></p>
     </section>
 
-    <!-- ===== Histórico ===== -->
-    <section class="view" id="view-history">
-      <div class="list" id="history-list"></div>
-      <div class="card" id="history-detail" hidden>
-        <div class="row space">
-          <strong id="hd-title"></strong>
-          <button class="btn btn-ghost" id="hd-back">Voltar</button>
-        </div>
-        <pre class="mono md" id="hd-md"></pre>
+    <!-- ===== Mais: projetos e histórico ===== -->
+    <section class="view" id="view-more">
+      <div class="segmented" data-group="more">
+        <button class="segment is-active" data-sub="clients" type="button">Projetos</button>
+        <button class="segment" data-sub="history" type="button">Histórico</button>
+      </div>
+
+      <div class="subview is-active" id="sub-clients">
         <div class="row">
-          <button class="btn btn-ghost" id="hd-copy">Copiar</button>
-          <button class="btn btn-ghost danger-text" id="hd-delete">Excluir</button>
+          <input class="input" id="client-search" placeholder="Buscar projeto" type="search">
+          <button class="btn btn-primary btn-fit" id="btn-new-client">Novo</button>
+        </div>
+        <div class="list" id="client-list"></div>
+        <div class="row export-row">
+          <button class="btn btn-ghost" id="btn-export">Exportar JSON</button>
+          <button class="btn btn-ghost" id="btn-import">Importar JSON</button>
+          <input type="file" id="import-file" accept="application/json" hidden>
+        </div>
+        <p class="small muted">Exporte o JSON para compartilhar com o time. Importar mescla pelo nome e nunca apaga.</p>
+
+        <form class="card client-form" id="client-form" hidden>
+          <h3 id="client-form-title">Novo projeto</h3>
+          <input type="hidden" id="cf-id">
+          <label class="field"><span>Nome</span><input class="input" id="cf-name" required placeholder="Ex.: Loja Exemplo"></label>
+          <label class="field"><span>Domínios das LPs (um por linha)</span><textarea class="input" id="cf-domains" rows="3" placeholder="lojaexemplo.com.br&#10;lp.lojaexemplo.com.br"></textarea></label>
+          <label class="field"><span>Números de WhatsApp esperados (um por linha)</span><textarea class="input" id="cf-whatsapp" rows="3" placeholder="35 99999-0000"></textarea></label>
+          <label class="field"><span>Observações</span><textarea class="input" id="cf-notes" rows="2" placeholder="Pixel oficial, GTM oficial, quem aprova…"></textarea></label>
+          <div class="row">
+            <button class="btn btn-primary" type="submit">Salvar</button>
+            <button class="btn btn-ghost" type="button" id="cf-cancel">Cancelar</button>
+            <button class="btn btn-ghost danger-text" type="button" id="cf-delete" hidden>Excluir</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="subview" id="sub-history">
+        <div class="list" id="history-list"></div>
+        <div class="card" id="history-detail" hidden>
+          <div class="row space">
+            <strong id="hd-title"></strong>
+            <button class="btn btn-ghost" id="hd-back">Voltar</button>
+          </div>
+          <pre class="mono md" id="hd-md"></pre>
+          <div class="row">
+            <button class="btn btn-ghost" id="hd-copy">Copiar</button>
+            <button class="btn btn-ghost danger-text" id="hd-delete">Excluir</button>
+          </div>
         </div>
       </div>
     </section>

@@ -34,6 +34,7 @@ Conferir isso na mão leva meia hora, exige abrir o GTM Preview, o gerenciador d
 - **Confere a compra em loja e página de vendas.** Reconhece a plataforma (Shopify, WooCommerce, Nuvemshop, Hotmart, Kiwify, Eduzz e outras), vê se `ViewContent`/`view_item` disparou, se os links de checkout levam a origem (`utm`, `src`, `sck`) e, com um clique no botão de compra, se `InitiateCheckout`/`begin_checkout` sai e o checkout abre com os parâmetros. O evento de compra em si fica como "não conferido" até uma compra de teste.
 - **Abre a página com UTM de teste.** Um clique monta a URL da aba (ou uma colada) com parâmetros de origem conhecidos, abre e varre. Assim dá para provar se a UTM chega ao WhatsApp, aos campos ocultos e ao CRM.
 - **Testa o envio de ponta a ponta.** Preenche com dados marcados como teste, percorre o quiz sozinho se precisar, envia e observa: a requisição saiu? Meta recebeu `Lead`? GA4 recebeu `generate_lead`? Google Ads contou a conversão? A UTM foi no corpo do envio?
+- **Gera UTM.** Escolha a plataforma de anúncio e copie a URL de campanha ou só os parâmetros, com as macros de cada uma preservadas.
 - **Olha a saúde básica.** HTTPS, CSS que não carregou, erros de JavaScript, título, viewport, tempo de carregamento.
 - **Entrega o laudo pronto.** Verde, amarelo ou vermelho; três blocos (achados, em ordem, não deu para conferir); copia como markdown ou resumo curto; salva print e histórico.
 
@@ -64,11 +65,11 @@ Para atualizar: substitua os arquivos da pasta e clique em **Atualizar** na pág
 
 ## Usar em três passos
 
-1. Abra a landing page, de preferência pelo link final do anúncio (com UTM). Sem o link? Use **Abrir com UTM de teste** no painel: ele monta a URL com origem conhecida, abre e varre.
-2. Clique no olho e em **Varrer página**. Se a página já estava aberta antes da extensão, use **Recarregar e varrer**.
-3. Leia o veredito. Abra cada item para ver evidência e correção. **Copiar laudo** gera o markdown completo; **Copiar resumo**, a versão curta para mensagem. Cole o laudo na sua IA e peça a correção: ele já vem com a evidência e o que fazer em cada item.
+1. Abra a landing page, de preferência pelo link final do anúncio (com UTM). Sem o link? Use **Diagnóstico → Testes → Abrir com UTM de teste**: ele monta a URL com origem conhecida, abre e varre.
+2. Clique no olho. O painel varre sozinho e mostra se a página está rastreada, com as plataformas e os códigos. Se a página já estava aberta antes da extensão, use **Recarregar a página e varrer**.
+3. Para ir além, abra a aba **Diagnóstico** e leia o veredito. Abra cada item para ver evidência e correção. **Copiar laudo** gera o markdown completo; **Copiar resumo**, a versão curta para mensagem. Cole o laudo na sua IA e peça a correção: ele já vem com a evidência e o que fazer em cada item.
 
-Quer confirmar que o lead chega? Abra **Teste de envio do formulário** e envie. Vai cair um lead `TESTE TRACK EYE` no CRM do projeto, de propósito; apague depois.
+Quer confirmar que o lead chega? Em **Diagnóstico → Testes**, abra **Teste de envio do formulário** e envie. Vai cair um lead `TESTE TRACK EYE` no CRM do projeto, de propósito; apague depois.
 
 O guia completo, aba por aba, está em [docs/guia.md](docs/guia.md).
 
@@ -103,7 +104,7 @@ O Track Eye só observa. Não bloqueia requisição, não altera a página, não
 
 ```bash
 npm install     # só jsdom, para os testes
-npm test        # 43 testes: scanner, regras, rede, laudo, quiz, widgets, UTM de teste e compra
+npm test        # 72 testes: scanner, regras, rede, laudo, quiz, widgets, UTM, resumo e compra
 npm run icons   # regenera os ícones PNG
 ```
 
