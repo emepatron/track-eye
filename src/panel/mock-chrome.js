@@ -8,7 +8,9 @@ const storage = {
   set: async (obj) => { Object.assign(mem, obj); },
   remove: async () => {},
 };
+const updated = [];
 const listeners = () => ({ addListener() {} });
+const notifyLoaded = () => setTimeout(() => updated.forEach((fn) => fn(tab.id, { status: 'complete' })), 300);
 
 // Página fictícia para a varredura de demonstração.
 const demoHtml = `<!doctype html><html><head><title>LP Demonstração — Track Eye</title><meta name="viewport" content="width=device-width">
@@ -53,7 +55,8 @@ globalThis.chrome = {
     sendMessage(msg, cb) {
       const reply = (r) => setTimeout(() => cb(r), msg.type === 'scan' ? 500 : 50);
       if (msg.type === 'scan') return reply({ scan: demoScan(), events: demoEvents, navs: demoNavs });
-      if (msg.type === 'events' || msg.type === 'afterTest') return reply({ events: [...demoEvents, { t: Date.now(), kind: 'meta', url: '', params: { id: '1234567890123456', ev: 'Lead' } }], navs: [...demoNavs, { t: Date.now(), url: 'https://lp.clinicaexemplo.com.br/obrigado' }], dataLayerEvents: ['form_submit'] });
+      if (msg.type === 'events') return reply({ events: demoEvents, navs: demoNavs });
+      if (msg.type === 'afterTest') return reply({ events: [...demoEvents, { t: Date.now(), kind: 'meta', url: '', params: { id: '1234567890123456', ev: 'Lead' } }], navs: [...demoNavs, { t: Date.now(), url: 'https://lp.clinicaexemplo.com.br/obrigado' }], dataLayerEvents: ['form_submit'] });
       if (msg.type === 'startTest') return reply({ ok: true, startedAt: Date.now(), url: tab.url, filled: [{ name: 'nome', value: 'TESTE TRACK EYE' }, { name: 'email', value: msg.data.email }], submittedVia: 'clique no botão "Quero agendar"' });
       if (msg.type === 'capture') return reply({ dataUrl: 'data:image/png;base64,' });
       if (msg.type === 'clickBuy') { demoEvents.push({ t: Date.now() + 1500, kind: 'meta', url: '', params: { id: '1234567890123456', ev: 'InitiateCheckout' } }); demoNavs.push({ t: Date.now() + 2000, url: 'https://pay.hotmart.com/A1B2C3?src=lp&sck=instagram' }); return reply({ ok: true, startedAt: Date.now(), url: tab.url, href: msg.href, text: 'Quero garantir minha vaga' }); }
@@ -63,11 +66,11 @@ globalThis.chrome = {
   storage: { local: storage, session: storage },
   tabs: {
     query: async () => [tab],
-    reload: async () => {},
-    update: async (id, props) => { if (props && props.url) tab.url = props.url; return tab; },
+    reload: async () => { notifyLoaded(); },
+    update: async (id, props) => { if (props && props.url) tab.url = props.url; notifyLoaded(); return tab; },
     create: async (props) => { window.open(props.url, '_blank'); return { id: 2, url: props.url }; },
     onActivated: listeners(),
-    onUpdated: listeners(),
+    onUpdated: { addListener(fn) { updated.push(fn); } },
   },
 };
 mem.clients = [
