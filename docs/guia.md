@@ -4,7 +4,7 @@ O Track Eye tem quatro abas e uma engrenagem, na ordem do que se usa com mais fr
 
 ## Aba Início
 
-É a verificação rápida. Abra o painel e ele varre sozinho, sem clique: também varre de novo quando a página termina de carregar ou quando você muda de aba. A varredura só lê a página, não envia nem clica em nada.
+É a verificação rápida. Abra o painel e ele varre sozinho, sem clique: também varre de novo quando a página termina de carregar ou quando você muda de aba. A varredura só lê a página, não envia nem clica em nada. Se preferir varrer só no clique, desligue "Varrer sozinho" na engrenagem.
 
 **Status.** Responde se a página está rastreada:
 

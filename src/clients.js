@@ -82,7 +82,7 @@ export async function importClients(json) {
 }
 
 export async function getSettings() {
-  return { analyst: '', testPhone: '', testEmail: '', utmTemplate: '', ...(await get(KEY_SETTINGS, {})) };
+  return { analyst: '', testPhone: '', testEmail: '', utmTemplate: '', autoScan: true, ...(await get(KEY_SETTINGS, {})) };
 }
 export async function saveSettings(patch) {
   const s = { ...(await getSettings()), ...patch };

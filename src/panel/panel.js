@@ -126,8 +126,13 @@ $('client-pick').addEventListener('change', (e) => {
 // Roda sozinha quando a página está pronta e ainda não há resultado: a verificação
 // rápida é o uso mais comum. Só lê a página; nada é enviado nem clicado.
 function autoScan() {
+  if (state.autoScan === undefined) {
+    // A preferência vem do storage; até chegar, nada roda sozinho.
+    db.getSettings().then((s) => { state.autoScan = s.autoScan !== false; autoScan(); });
+    return;
+  }
   const t = state.tab;
-  if (!isWeb(t) || t.status === 'loading' || state.testRunning || state.scan || state.scanning) return;
+  if (!state.autoScan || !isWeb(t) || t.status === 'loading' || state.testRunning || state.scan || state.scanning) return;
   if (state.scanError && state.scanError.url === t.url) return;
   runScan();
 }
@@ -196,6 +201,7 @@ function renderScanState() {
   else if (state.scanning) { status = 'scanning'; label = 'VARRENDO…'; detail = 'Lendo as tags e os disparos da página.'; }
   else if (state.scanError) { status = 'indefinido'; label = 'NÃO DEU PARA VARRER'; detail = 'Recarregue e tente de novo. Páginas internas do navegador e a loja de extensões não permitem a leitura.'; }
   else if (s) { status = s.status; label = STATUS_TEXT[s.status]; detail = s.detail; }
+  else if (state.autoScan === false) detail = 'Clique no botão ao lado para varrer.';
   else { status = 'scanning'; label = 'CARREGANDO…'; detail = 'Varro assim que a página terminar de carregar.'; }
 
   $('status').dataset.status = status;
@@ -367,7 +373,7 @@ function renderInventory() {
     <h4>Formulários</h4>${(s.forms || []).length || (s.embeddedForms || []).length ? kv([...s.forms.map((f) => [f.id || `#${f.index + 1}`, `${f.provider} · ${f.visibleFields} visíveis, ${f.hiddenFields} ocultos${f.actionHost ? ' → ' + f.actionHost : ''}${f.visible === false ? ' · oculto' : ''} · ${f.fields.map((x) => x.name || x.placeholder || x.type).join(', ')}`]), ...(s.embeddedForms || []).map((e) => ['iframe', `${e.provider} · ${e.src.slice(0, 80)}`])]) : '<span class="muted small">Nenhum.</span>'}
     ${s.commerce && (s.commerce.kind || s.commerce.buyButtons.length) ? `<h4>Compra</h4>${kv([['Tipo', `${s.commerce.kind === 'loja' ? 'loja' : s.commerce.kind === 'vendas' ? 'página de vendas' : 'botão de compra'}${s.commerce.platform ? ' · ' + s.commerce.platform : ''}`], ...(s.commerce.product ? [['Produto', `${s.commerce.product.name}${s.commerce.product.price ? ' · ' + (s.commerce.product.currency || '') + ' ' + s.commerce.product.price : ''}`]] : []), ...s.commerce.buyButtons.slice(0, 8).map((b) => [b.position, `"${b.text}"${b.href ? ' → ' + b.href.slice(0, 90) : ''}${b.originKeys.length ? ' · origem: ' + b.originKeys.join(', ') : ''}`]), ['Funil visto', s.commerce.funnelEvents.length ? s.commerce.funnelEvents.join(', ') : 'nenhum evento de funil nesta visita']])}` : ''}
     <h4>Página</h4>${kv([['H1', (s.h1 || []).join(' | ') || '—'], ['Scripts de', (s.scriptHosts || []).slice(0, 12).join(', ') || '—'], ['Iframes', (s.frames || []).length ? s.frames.map((f) => `${f.host} (${f.forms} form)`).join(', ') : '—'], ['No JS', state.deep ? [...(state.deep.waInJs || []), ...(state.deep.endpoints || [])].slice(0, 8).join(', ') || 'nada relevante' : '—'], ['dataLayer', s.log.dataLayerEvents.length ? s.log.dataLayerEvents.join(', ') : `${s.log.dataLayerPushes} push(es)`], ['Erros JS', String(s.health.errorCount || 0)]])}
-    <h4>Eventos observados (${timeline.length})</h4>${timeline.length ? `<div class="timeline">${timeline.map((x) => `<div><span class="${x.k === 'nav' ? 'nav' : 'k'}">${x.k === 'nav' ? 'página' : x.k}</span><span>+${((x.t - base) / 1000).toFixed(1)}s ${esc(x.txt)}</span></div>`).join('')}</div>` : '<span class="muted small">Nenhuma requisição de rastreamento observada. Se a página já estava aberta, use Recarregar e varrer.</span>'}
+    <h4>Eventos observados (${timeline.length})</h4>${timeline.length ? `<div class="timeline">${timeline.map((x) => `<div><span class="${x.k === 'nav' ? 'nav' : 'k'}">${x.k === 'nav' ? 'página' : x.k}</span><span>+${((x.t - base) / 1000).toFixed(1)}s ${esc(x.txt)}</span></div>`).join('')}</div>` : '<span class="muted small">Nenhuma requisição de rastreamento observada. Se a página já estava aberta, use Recarregar a página e varrer.</span>'}
   </div>`;
 }
 
@@ -598,12 +604,16 @@ $('hd-delete').addEventListener('click', async () => {
 $('btn-settings').addEventListener('click', async () => {
   const s = await db.getSettings();
   $('st-analyst').value = s.analyst; $('st-email').value = s.testEmail; $('st-phone').value = s.testPhone; $('st-utm').value = s.utmTemplate || DEFAULT_UTM_TEMPLATE;
+  $('st-autoscan').checked = s.autoScan !== false;
   $('settings').showModal();
 });
 $('settings').addEventListener('close', async () => {
   if ($('settings').returnValue !== 'save') return;
   const utmTemplate = $('st-utm').value.trim();
-  await db.saveSettings({ analyst: $('st-analyst').value.trim(), testEmail: $('st-email').value.trim(), testPhone: $('st-phone').value.trim(), utmTemplate: utmTemplate === DEFAULT_UTM_TEMPLATE ? '' : utmTemplate });
+  const autoScanOn = $('st-autoscan').checked;
+  await db.saveSettings({ analyst: $('st-analyst').value.trim(), testEmail: $('st-email').value.trim(), testPhone: $('st-phone').value.trim(), utmTemplate: utmTemplate === DEFAULT_UTM_TEMPLATE ? '' : utmTemplate, autoScan: autoScanOn });
+  state.autoScan = autoScanOn;
+  autoScan();
   $('utm-template').value = utmTemplate || DEFAULT_UTM_TEMPLATE; renderUtmPreview();
   toast('Configurações salvas');
 });
