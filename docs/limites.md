@@ -20,7 +20,7 @@ Eles bloqueiam exatamente os scripts que o Track Eye precisa observar. A sonda d
 
 ## Primeira visita sem o observador
 
-Se a página carregou antes de a extensão ser instalada ou ativada, o observador não capturou o que disparou no carregamento. O laudo avisa e manda usar "Recarregar e varrer".
+Se a página carregou antes de a extensão ser instalada ou ativada, o observador não capturou o que disparou no carregamento. O laudo avisa e manda usar "Recarregar a página e varrer".
 
 ## Quiz e fluxos em etapas
 
