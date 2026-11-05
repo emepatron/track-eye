@@ -505,7 +505,7 @@
       <div class="idx reveal">
         <div class="idx-row">
           <h3>Está disparando?</h3>
-          <p>Ele observa as requisições da aba, não o HTML. <b>GTM, GA4, pixel da Meta, Google Ads, Clarity, Hotjar e TikTok</b>: no código, carregado e disparando. Pega pixel duplicado, mais de um container e pixel escondido dentro de iframe.</p>
+          <p>Abra o painel e a resposta aparece sem clique: <b>rastreada ou não, com as plataformas e os códigos</b> prontos para copiar. Ele observa as requisições da aba, não o HTML: GTM, GA4, pixel da Meta, Google Ads, Clarity, Hotjar e TikTok, no código, carregado e disparando. Pega pixel duplicado, mais de um container e pixel escondido dentro de iframe.</p>
           <div class="ev"><i class="fail"></i>Pixel da Meta no código, 0 eventos na rede (3333000033330000)</div>
         </div>
         <div class="idx-row">
@@ -515,7 +515,7 @@
         </div>
         <div class="idx-row">
           <h3>A origem chega no CRM?</h3>
-          <p>A UTM precisa sobreviver ao caminho todo: <b>URL, link de WhatsApp, campo oculto e corpo do envio</b>. Ele segue cada etapa e diz onde a origem se perdeu. Sem o link do anúncio? Um clique abre a página com <b>UTM de teste</b> e varre.</p>
+          <p>A UTM precisa sobreviver ao caminho todo: <b>URL, link de WhatsApp, campo oculto e corpo do envio</b>. Ele segue cada etapa e diz onde a origem se perdeu. Sem o link do anúncio? Um clique abre a página com <b>UTM de teste</b> e varre. Na hora de montar o anúncio, a aba UTM <b>gera a URL de campanha</b> com as macros de Meta, Google, TikTok e mais 11 plataformas.</p>
           <div class="ev"><i class="pass"></i>utm_source, utm_campaign no corpo do POST /api/lead</div>
         </div>
         <div class="idx-row">
@@ -650,6 +650,7 @@
         <details><summary>É seguro? Por que não está na Chrome Web Store?</summary><p>O código é aberto, com licença MIT, e cabe em poucos arquivos que qualquer pessoa pode ler no GitHub. A extensão não tem servidor, não cria conta e não manda nada para fora do seu navegador, fora o teste de envio que você dispara de propósito. A publicação na loja ainda não começou: por enquanto a instalação é pelo modo do desenvolvedor, como em qualquer extensão em alfa.</p></details>
         <details><summary>Funciona em quiz e em formulário dentro de iframe?</summary><p>Sim. O teste de envio percorre o quiz sozinho (primeira opção de cada etapa, "Continuar" quando existe) até o formulário aparecer; se não conseguir, espera você chegar lá e envia na hora. A varredura roda em todos os frames da aba, então formulários embutidos de CRM entram no laudo com campos, captcha e provedor.</p></details>
         <details><summary>O teste de envio cria um lead de verdade?</summary><p>Cria, de propósito. O lead chega como "TESTE TRACK EYE", com e-mail e telefone de teste que você configura. É a única forma de provar que o Lead dispara na Meta, que o GA4 conta e que a UTM chega no CRM. Depois, apague no CRM.</p></details>
+        <details><summary>Ele gera UTM ou só confere?</summary><p>Os dois. Para auditar, "Abrir com UTM de teste" carrega a página com parâmetros conhecidos e prova se eles chegam no WhatsApp, nos campos ocultos e no CRM. Para montar o anúncio, a aba UTM gera a URL de campanha: você escolhe a plataforma, ele preenche o padrão dela (com as macros intactas, como {{campaign.name}} e {campaignid}), padroniza o texto e copia a URL ou só os parâmetros, no formato que o campo da plataforma pede.</p></details>
         <details><summary>Preciso de conta, chave ou servidor?</summary><p>Não. Tudo roda no seu navegador. Não existe backend, login nem telemetria. O cadastro de projetos é um JSON que você exporta e importa onde quiser.</p></details>
         <details><summary>Ele vê a configuração do GTM?</summary><p>Ele vê o resultado do GTM (o que disparou nesta visita), não a configuração (tags, gatilhos, Conversion Linker). Para auditar o container por dentro, continue usando o GTM Preview. Eventos enviados pelo servidor (CAPI) também ficam fora.</p></details>
         <details><summary>Por que o laudo deu vermelho numa página que eu sei que está certa?</summary><p>Quase sempre é bloqueador de anúncios ou Brave Shields no seu navegador barrando o GTM. O Track Eye detecta isso e avisa; desligue o bloqueio para o site, recarregue e varra de novo. Se não for isso, abra uma issue no GitHub com o laudo e a URL.</p></details>
